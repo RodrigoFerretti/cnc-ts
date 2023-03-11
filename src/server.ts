@@ -3,15 +3,16 @@ import { Router } from "./router";
 
 export class Server extends WebSocketServer {
     constructor(private router: Router) {
-        super({ port: 8080 });
+        super({ port: 8080 }, () => console.log("websocket server running on port 8080"));
 
         this.on("connection", (webSocket) => {
             webSocket.send("connected", {}, this.handleError);
 
             webSocket.on("message", (data) => {
-                const message = data.toString();
-                const result = this.router.handleMessage(message);
-                result;
+                const requestMessage = data.toString();
+                const responseMessage = this.router.handleMessage(requestMessage);
+
+                webSocket.send(responseMessage);
             });
         });
     }

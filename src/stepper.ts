@@ -1,9 +1,20 @@
+import { Arc } from "./arc";
+
 export class Stepper {
-    public moveTo = (options: Stepper.MoveToOptions) => {
+    public linearMove = (options: Stepper.LinearMoveOptions) => {
         options;
+    };
+
+    public arcMove = (options: Stepper.ArcMoveOptions) => {
+        options;
+    };
+
+    public getPosition = (): number => {
+        return 0;
     };
 }
 
 export namespace Stepper {
-    export type MoveToOptions = { position: number; feedRate?: number };
+    export type LinearMoveOptions = { position: number; speed?: number };
+    export type ArcMoveOptions = { arc: Arc; axis: 0 | 1 };
 }

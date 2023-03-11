@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "run server",
+            "command": "yarn ts-node-dev --respawn ./src/index.ts",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "name": "run and debug current .ts file",
+            "command": "yarn ts-node-dev --respawn ${relativeFile}",
+            "request": "launch",
+            "type": "node-terminal"
+        }
+    ]
+}
