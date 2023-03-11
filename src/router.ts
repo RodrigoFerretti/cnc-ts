@@ -1,22 +1,25 @@
-import { Service } from "./service";
 import { GCode } from "./gcode";
-import { matchGroups } from "./regex";
+import { matchGroups } from "./lib/regex";
+import { Service } from "./service";
 
 export class Router {
+    private regex: RegExp;
     private routes: Router.Route[];
 
-    private regex =
-        /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
+    public constructor(options: Router.Options) {
+        const service = options.service;
 
-    public constructor(private service: Service) {
+        this.regex =
+            /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
+
         this.routes = [
-            { command: "G00", handle: this.service.rapidMove },
-            { command: "G01", handle: this.service.linearMove },
-            { command: "G02", handle: this.service.arcMove },
-            { command: "G03", handle: this.service.arcMove },
-            { command: "G28", handle: this.service.home },
-            { command: "M00", handle: this.service.pause },
-            { command: "M99", handle: this.service.resume },
+            { command: "G00", handle: service.rapidMove },
+            { command: "G01", handle: service.linearMove },
+            { command: "G02", handle: service.arcMove },
+            { command: "G03", handle: service.arcMove },
+            { command: "G28", handle: service.home },
+            { command: "M00", handle: service.pause },
+            { command: "M99", handle: service.resume },
         ];
     }
 
@@ -38,5 +41,12 @@ export class Router {
 }
 
 export namespace Router {
-    export type Route = { command: string; handle: Service.Handler };
+    export type Options = {
+        service: Service;
+    };
+
+    export type Route = {
+        command: string;
+        handle: Service.Handler;
+    };
 }

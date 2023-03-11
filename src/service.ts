@@ -1,24 +1,28 @@
-import { Arc } from "./arc";
+import { Arc } from "./lib/arc";
 import { GCode } from "./gcode";
 import { Stepper } from "./stepper";
-import { Switch } from "./switch";
-import { Vector } from "./vector";
+import { Sensor } from "./sensor";
+import { Vector } from "./lib/vector";
 
 export class Service {
-    private status: Service.Status = Service.Status.NotMoving;
-    private arcMaxVelocity: number = 0;
+    private status: Service.Status;
+    private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
+    private steppers: [Stepper, Stepper, Stepper];
+    private arcMaxVelocity: number;
 
-    constructor(
-        private steppers: [Stepper, Stepper, Stepper],
-        private switches: [Switch, Switch, Switch, Switch, Switch, Switch]
-    ) {
-        this.switches;
+    constructor(options: Service.Options) {
+        this.status = Service.Status.NotMoving;
+        this.sensors = options.sensors;
+        this.steppers = options.steppers;
+        this.arcMaxVelocity = 0;
+
+        this.sensors;
     }
 
     public home: Service.Handler<GCode.Home> = () => {
         if (this.status !== Service.Status.NotMoving) return "can only move when not moving";
 
-        this.status = Service.Status.Moving;
+        this.status = Service.Status.Homing;
 
         return this.status;
     };
@@ -111,9 +115,7 @@ export class Service {
             speed: arcSpeed,
         });
 
-        this.steppers[abscissa].arcMove({ arc, axis: 0 });
-        this.steppers[ordinate].arcMove({ arc, axis: 1 });
-        this.steppers[applicate].linearMove({ position: finalPosition[applicate], speed: applicateSpeed });
+        [arc, applicate, applicateSpeed];
 
         return this.status;
     };
@@ -136,9 +138,15 @@ export class Service {
 }
 
 export namespace Service {
+    export type Options = {
+        steppers: [Stepper, Stepper, Stepper];
+        sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
+    };
+
     export enum Status {
         Paused = "paused",
         Moving = "moving",
+        Homing = "homing",
         NotMoving = "not-moving",
     }
 

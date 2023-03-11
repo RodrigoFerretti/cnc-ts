@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Either } from "./either";
+import { Either } from "./lib/either";
 
 export type GCode = z.infer<typeof GCode.schema>;
 

@@ -2,7 +2,9 @@ import { WebSocketServer } from "ws";
 import { Router } from "./router";
 
 export class Server extends WebSocketServer {
-    constructor(private router: Router) {
+    constructor(options: Server.Options) {
+        const router = options.router;
+
         super({ port: 8080 }, () => console.log("websocket server running on port 8080"));
 
         this.on("connection", (webSocket) => {
@@ -10,7 +12,7 @@ export class Server extends WebSocketServer {
 
             webSocket.on("message", (data) => {
                 const requestMessage = data.toString();
-                const responseMessage = this.router.handleMessage(requestMessage);
+                const responseMessage = router.handleMessage(requestMessage);
 
                 webSocket.send(responseMessage);
             });
@@ -18,4 +20,10 @@ export class Server extends WebSocketServer {
     }
 
     private handleError = (_error: Error | undefined) => {};
+}
+
+export namespace Server {
+    export type Options = {
+        router: Router;
+    };
 }

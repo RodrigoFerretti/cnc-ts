@@ -1,27 +1,27 @@
 import { Router } from "./router";
+import { Sensor } from "./sensor";
 import { Server } from "./server";
 import { Service } from "./service";
 import { Stepper } from "./stepper";
-import { Switch } from "./switch";
 
 const stepperX = new Stepper();
 const stepperY = new Stepper();
 const stepperZ = new Stepper();
 
-const switchXA = new Switch();
-const switchXB = new Switch();
-const switchYA = new Switch();
-const switchYB = new Switch();
-const switchZA = new Switch();
-const switchZB = new Switch();
+const sensorXA = new Sensor();
+const sensorXB = new Sensor();
+const sensorYA = new Sensor();
+const sensorYB = new Sensor();
+const sensorZA = new Sensor();
+const sensorZB = new Sensor();
 
-const service = new Service(
-    [stepperX, stepperY, stepperZ],
-    [switchXA, switchXB, switchYA, switchYB, switchZA, switchZB]
-);
+const service = new Service({
+    steppers: [stepperX, stepperY, stepperZ],
+    sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
+});
 
-const router = new Router(service);
+const router = new Router({ service });
 
-const server = new Server(router);
+const server = new Server({ router });
 
 server;

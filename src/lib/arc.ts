@@ -10,7 +10,14 @@ export class Arc {
     private initialPosition: Vector<2>;
     private centerPosition: Vector<2>;
 
-    constructor({ initialPosition, centerPosition, finalPosition, speed, isClockWise, arcTolerance = 1 }: Arc.Options) {
+    public constructor(options: Arc.Options) {
+        const initialPosition = options.initialPosition;
+        const centerPosition = options.centerPosition;
+        const finalPosition = options.finalPosition;
+        const arcTolerance = options.arcTolerance || 0.01;
+        const isClockWise = options.isClockWise;
+        const speed = options.speed;
+
         this.initialPosition = initialPosition;
         this.centerPosition = centerPosition;
         this.speed = speed;
