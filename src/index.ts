@@ -5,9 +5,9 @@ import { Controller } from "./controller";
 import { Stepper } from "./stepper";
 import { Service } from "./service";
 
-const stepperX = new Stepper();
-const stepperY = new Stepper();
-const stepperZ = new Stepper();
+const stepperX = new Stepper({});
+const stepperY = new Stepper({});
+const stepperZ = new Stepper({});
 
 const sensorXA = new Sensor();
 const sensorXB = new Sensor();

@@ -15,9 +15,9 @@ export class HomeService {
         this.backMovePosition = 100;
 
         this.status = [
-            this.sensors[0].reading === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
-            this.sensors[2].reading === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
-            this.sensors[4].reading === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
+            this.sensors[0].getReading() === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
+            this.sensors[2].getReading() === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
+            this.sensors[4].getReading() === true ? HomeService.Status.StepACompleted : HomeService.Status.NotStarted,
         ];
     }
 
@@ -38,7 +38,7 @@ export class HomeService {
             }
 
             if (this.status[i] === HomeService.Status.StepAInProcess) {
-                if (this.sensors[i * 2].reading === false) return;
+                if (this.sensors[i * 2].getReading() === false) return;
 
                 const currentPosition = stepper.getPosition();
                 stepper.linearMove({ position: currentPosition });
@@ -63,7 +63,7 @@ export class HomeService {
             }
 
             if (this.status[i] === HomeService.Status.StepCInProcess) {
-                if (this.sensors[i * 2].reading === false) return;
+                if (this.sensors[i * 2].getReading() === false) return;
 
                 const currentPosition = stepper.getPosition();
                 stepper.linearMove({ position: currentPosition });

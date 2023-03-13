@@ -1,12 +1,15 @@
 export class Sensor {
-    public reading: boolean;
+    private reading: boolean;
 
     constructor() {
         this.reading = true;
     }
 
-    public read = (): boolean => {
+    public read = () => {
         this.reading = true;
+    };
+
+    public getReading = () => {
         return this.reading;
     };
 }
