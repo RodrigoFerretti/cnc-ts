@@ -1,10 +1,9 @@
 import { Vector } from "./vector";
 
 export class Arc {
-    public pointsLength: number;
-
     private angle: number;
     private radius: number;
+    private pointsLength: number;
     private segmentAngle: number;
     private initialPosition: Vector<2>;
     private centerPosition: Vector<2>;
@@ -41,6 +40,10 @@ export class Arc {
         this.segmentAngle = this.angle / this.pointsLength;
     }
 
+    public getPointsLenght = () => {
+        return this.pointsLength;
+    };
+
     public getPoint = (options: Arc.GetPointOptions): Arc.Point => {
         const index = options.index;
         const speed = options.speed;
@@ -60,7 +63,6 @@ export class Arc {
         const pointSpeed: Vector<2> = [Math.abs(segmentSin) * speed, Math.abs(segmentCos) * speed];
 
         return {
-            index,
             speed: pointSpeed,
             position: pointPosition,
         };
@@ -77,7 +79,6 @@ export namespace Arc {
     };
 
     export type Point = {
-        index: number;
         speed: Vector<2>;
         position: Vector<2>;
     };

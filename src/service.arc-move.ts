@@ -33,7 +33,7 @@ export class ArcMoveService {
 
     public loop = () => {
         this.coordinates.reduce<void>((_, coordinate, i) => {
-            if (this.indexes[i] === this.arc.pointsLength) {
+            if (this.indexes[i] === this.arc.getPointsLenght()) {
                 this.status[i] = ArcMoveService.Status.Completed;
                 return;
             }
