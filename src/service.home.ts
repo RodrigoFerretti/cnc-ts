@@ -21,6 +21,15 @@ export class HomeService {
         ];
     }
 
+    public getStatus = () => {
+        return this.status.reduce((status, currentStatus) => {
+            const homeServiceStatus = Object.values(HomeService.Status);
+            return homeServiceStatus.indexOf(currentStatus) < homeServiceStatus.indexOf(status)
+                ? currentStatus
+                : status;
+        }, HomeService.Status.NotStarted);
+    };
+
     public loop = () => {
         this.steppers.reduce<void>((_, stepper, i) => {
             if (this.status[i] === HomeService.Status.NotStarted) {

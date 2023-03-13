@@ -126,25 +126,33 @@ export class Service {
     public resume = () => {};
 
     public loop = () => {
-        const reading = this.sensors.reduce<boolean>((reading, sensor) => {
-            return sensor.read() ? true : reading;
-        }, false);
-
-        reading;
+        this.sensors.reduce<void>((_, sensor) => {
+            sensor.read();
+        }, undefined);
 
         if (this.status === Service.Status.Homing && this.homeService !== undefined) {
             this.homeService.loop();
+            const homeServiceStatus = this.homeService.getStatus();
+            this.status = homeServiceStatus === HomeService.Status.Completed ? Service.Status.Idle : this.status;
         }
 
         if (this.status === Service.Status.ArcMoving && this.arcMoveService !== undefined) {
             this.arcMoveService.loop();
+            const arcMoveServiceStatus = this.arcMoveService.getStatus();
+            this.status = arcMoveServiceStatus === ArcMoveService.Status.Completed ? Service.Status.Idle : this.status;
         }
 
-        const stepped = this.steppers.reduce<boolean>((stepped, stepper) => {
-            return stepper.step() ? true : stepped;
-        }, false);
+        if (this.status === Service.Status.LinearMoving || this.status === Service.Status.RapidMoving) {
+            const moving = this.steppers.reduce<boolean>((moving, stepper) => {
+                return stepper.distanceToGo() === 0 ? false : moving;
+            }, true);
 
-        this.status = stepped ? this.status : Service.Status.Idle;
+            this.status = moving === false ? Service.Status.Idle : this.status;
+        }
+
+        this.steppers.reduce<void>((_, stepper) => {
+            stepper.step();
+        }, undefined);
     };
 }
 

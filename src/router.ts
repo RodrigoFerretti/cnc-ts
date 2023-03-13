@@ -5,21 +5,22 @@ import { Controller } from "./controller";
 export class Router {
     private regex: RegExp;
     private routes: Router.Route[];
+    private controller: Controller;
 
     public constructor(options: Router.Options) {
-        const service = options.controller;
+        this.controller = options.controller;
 
         this.regex =
             /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
 
         this.routes = [
-            { command: "G00", handle: service.rapidMove },
-            { command: "G01", handle: service.linearMove },
-            { command: "G02", handle: service.arcMove },
-            { command: "G03", handle: service.arcMove },
-            { command: "G28", handle: service.home },
-            { command: "M00", handle: service.pause },
-            { command: "M99", handle: service.resume },
+            { command: "G00", handle: this.controller.rapidMove },
+            { command: "G01", handle: this.controller.linearMove },
+            { command: "G02", handle: this.controller.arcMove },
+            { command: "G03", handle: this.controller.arcMove },
+            { command: "G28", handle: this.controller.home },
+            { command: "M00", handle: this.controller.pause },
+            { command: "M99", handle: this.controller.resume },
         ];
     }
 
