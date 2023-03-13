@@ -1,4 +1,9 @@
-export const matchGroups = <T extends Record<string, string>>(regex: RegExp, message: string): T => {
+export type MatchGroupsOptions = { regex: RegExp; message: string };
+
+export const matchGroups = <T extends Record<string, string>>(options: MatchGroupsOptions): T => {
+    const regex = options.regex;
+    const message = options.message;
+
     const matches = message.matchAll(regex);
 
     const groups = [...matches].reduce((result, matchArray) => {

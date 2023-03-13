@@ -1,8 +1,9 @@
 import { Router } from "./router";
 import { Sensor } from "./sensor";
 import { Server } from "./server";
-import { Service } from "./service";
+import { Controller } from "./controller";
 import { Stepper } from "./stepper";
+import { Service } from "./service";
 
 const stepperX = new Stepper();
 const stepperY = new Stepper();
@@ -20,7 +21,9 @@ const service = new Service({
     sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
 });
 
-const router = new Router({ service });
+const controller = new Controller({ service });
+
+const router = new Router({ controller });
 
 const server = new Server({ router });
 

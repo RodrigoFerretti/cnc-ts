@@ -99,7 +99,10 @@ export namespace GCode {
         resumeSchema,
     ]);
 
-    export const validate = (input: unknown): Either<GCode, z.ZodError> => {
+    export type ValidateOptions = { input: unknown };
+
+    export const validate = (options: ValidateOptions): Either<GCode, z.ZodError> => {
+        const input = options.input;
         const result = schema.safeParse(input);
 
         return result.success === true ? [result.data, null] : [null, result.error];

@@ -3,7 +3,6 @@ import { Vector } from "./vector";
 export class Arc {
     public pointsLength: number;
 
-    private speed: number;
     private angle: number;
     private radius: number;
     private segmentAngle: number;
@@ -11,16 +10,14 @@ export class Arc {
     private centerPosition: Vector<2>;
 
     public constructor(options: Arc.Options) {
-        const initialPosition = options.initialPosition;
-        const centerPosition = options.centerPosition;
-        const finalPosition = options.finalPosition;
-        const arcTolerance = options.arcTolerance || 0.01;
         const isClockWise = options.isClockWise;
-        const speed = options.speed;
+        const arcTolerance = options.arcTolerance || 0.01;
+        const finalPosition = options.finalPosition;
+        const centerPosition = options.centerPosition;
+        const initialPosition = options.initialPosition;
 
         this.initialPosition = initialPosition;
         this.centerPosition = centerPosition;
-        this.speed = speed;
 
         this.radius = Math.sqrt(
             Math.pow(this.initialPosition[0] - this.centerPosition[0], 2) +
@@ -44,7 +41,10 @@ export class Arc {
         this.segmentAngle = this.angle / this.pointsLength;
     }
 
-    public getPoint = (index: number): Arc.Point => {
+    public getPoint = (options: Arc.GetPointOptions): Arc.Point => {
+        const index = options.index;
+        const speed = options.speed;
+
         const segmentCos = Math.cos(index * this.segmentAngle);
         const segmentSin = Math.sin(index * this.segmentAngle);
 
@@ -57,27 +57,33 @@ export class Arc {
                     (this.initialPosition[1] - this.centerPosition[1]) * segmentCos),
         ];
 
-        const pointSpeed: Vector<2> = [Math.abs(segmentSin) * this.speed, Math.abs(segmentCos) * this.speed];
+        const pointSpeed: Vector<2> = [Math.abs(segmentSin) * speed, Math.abs(segmentCos) * speed];
 
         return {
-            position: pointPosition,
+            index,
             speed: pointSpeed,
+            position: pointPosition,
         };
     };
 }
 
 export namespace Arc {
     export type Options = {
-        initialPosition: Vector<2>;
-        centerPosition: Vector<2>;
-        finalPosition: Vector<2>;
-        arcTolerance?: number;
         isClockWise: boolean;
-        speed: number;
+        arcTolerance?: number;
+        finalPosition: Vector<2>;
+        centerPosition: Vector<2>;
+        initialPosition: Vector<2>;
     };
 
     export type Point = {
-        position: Vector<2>;
+        index: number;
         speed: Vector<2>;
+        position: Vector<2>;
+    };
+
+    export type GetPointOptions = {
+        index: number;
+        speed: number;
     };
 }

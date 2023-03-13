@@ -1,13 +1,13 @@
 import { GCode } from "./gcode";
 import { matchGroups } from "./lib/regex";
-import { Service } from "./service";
+import { Controller } from "./controller";
 
 export class Router {
     private regex: RegExp;
     private routes: Router.Route[];
 
     public constructor(options: Router.Options) {
-        const service = options.service;
+        const service = options.controller;
 
         this.regex =
             /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
@@ -24,9 +24,9 @@ export class Router {
     }
 
     public handleMessage = (message: string): string => {
-        const matches = matchGroups(this.regex, message);
+        const matches = matchGroups({ regex: this.regex, message });
 
-        const [gCode, error] = GCode.validate(matches);
+        const [gCode, error] = GCode.validate({ input: matches });
         if (error !== null) {
             return "invalid command";
         }
@@ -42,11 +42,11 @@ export class Router {
 
 export namespace Router {
     export type Options = {
-        service: Service;
+        controller: Controller;
     };
 
     export type Route = {
         command: string;
-        handle: Service.Handler;
+        handle: Controller.Handler;
     };
 }

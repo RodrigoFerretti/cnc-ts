@@ -10,3 +10,5 @@ export class Sensor {
         return this.reading;
     };
 }
+
+export namespace Sensor {}

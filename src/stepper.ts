@@ -7,9 +7,20 @@ export class Stepper {
         return 0;
     };
 
-    public step = () => {};
+    public setPosition = (options: Stepper.SetPositionOptions) => {
+        options;
+    };
+
+    public distanceToGo = (): number => {
+        return 0;
+    };
+
+    public step = (): boolean => {
+        return true;
+    };
 }
 
 export namespace Stepper {
     export type LinearMoveOptions = { position: number; speed?: number };
+    export type SetPositionOptions = { position: number };
 }
