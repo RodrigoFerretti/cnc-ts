@@ -22,7 +22,7 @@ export abstract class Move {
         }, false);
     };
 
-    public abstract loop: () => any;
+    public abstract loop: () => void;
 }
 
 export namespace Move {
