@@ -8,10 +8,10 @@ export class Router {
     private controller: Controller;
 
     public constructor(options: Router.Options) {
-        this.controller = options.controller;
-
         this.regex =
             /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
+
+        this.controller = options.controller;
 
         this.routes = [
             { command: "G00", handle: this.controller.rapidMove },

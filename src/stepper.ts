@@ -1,22 +1,17 @@
 export class Stepper {
     private position: number;
 
-    constructor(options: Stepper.Options) {
+    constructor() {
         this.position = 0;
-        options;
     }
 
-    public linearMove = (options: Stepper.LinearMoveOptions) => {
-        options;
-    };
+    public linearMove = (_options: Stepper.LinearMoveOptions) => {};
 
     public getPosition = () => {
         return this.position;
     };
 
-    public setPosition = (options: Stepper.SetPositionOptions) => {
-        options;
-    };
+    public setPosition = (_options: Stepper.SetPositionOptions) => {};
 
     public distanceToGo = (): number => {
         return 0;
@@ -26,7 +21,6 @@ export class Stepper {
 }
 
 export namespace Stepper {
-    export type Options = {};
     export type LinearMoveOptions = { position: number; speed?: number };
     export type SetPositionOptions = { position: number };
 }

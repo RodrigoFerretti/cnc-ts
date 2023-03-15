@@ -3,20 +3,20 @@ import { Vector } from "./vector";
 export class Arc {
     private angle: number;
     private radius: number;
+    private tolerance: number;
+    private isClockWise: boolean;
     private pointsLength: number;
     private segmentAngle: number;
-    private initialPosition: Vector<2>;
+    private finalPosition: Vector<2>;
     private centerPosition: Vector<2>;
+    private initialPosition: Vector<2>;
 
     public constructor(options: Arc.Options) {
-        const isClockWise = options.isClockWise;
-        const arcTolerance = options.arcTolerance || 0.01;
-        const finalPosition = options.finalPosition;
-        const centerPosition = options.centerPosition;
-        const initialPosition = options.initialPosition;
-
-        this.initialPosition = initialPosition;
-        this.centerPosition = centerPosition;
+        this.tolerance = options.arcTolerance || 0.01;
+        this.isClockWise = options.isClockWise;
+        this.finalPosition = options.finalPosition;
+        this.centerPosition = options.centerPosition;
+        this.initialPosition = options.initialPosition;
 
         this.radius = Math.sqrt(
             Math.pow(this.initialPosition[0] - this.centerPosition[0], 2) +
@@ -24,17 +24,17 @@ export class Arc {
         );
 
         this.angle = Math.atan2(
-            (initialPosition[0] - centerPosition[0]) * (finalPosition[1] - centerPosition[1]) -
-                (initialPosition[1] - centerPosition[1]) * (finalPosition[0] - centerPosition[0]),
-            (initialPosition[0] - centerPosition[0]) * (finalPosition[0] - centerPosition[0]) +
-                (initialPosition[1] - centerPosition[1]) * (finalPosition[1] - centerPosition[1])
+            (this.initialPosition[0] - this.centerPosition[0]) * (this.finalPosition[1] - this.centerPosition[1]) -
+                (this.initialPosition[1] - this.centerPosition[1]) * (this.finalPosition[0] - this.centerPosition[0]),
+            (this.initialPosition[0] - this.centerPosition[0]) * (this.finalPosition[0] - this.centerPosition[0]) +
+                (this.initialPosition[1] - this.centerPosition[1]) * (this.finalPosition[1] - this.centerPosition[1])
         );
 
-        this.angle = isClockWise && this.angle >= 0 ? this.angle - 2 * Math.PI : this.angle;
-        this.angle = !isClockWise && this.angle <= 0 ? this.angle + 2 * Math.PI : this.angle;
+        this.angle = this.isClockWise && this.angle >= 0 ? this.angle - 2 * Math.PI : this.angle;
+        this.angle = !this.isClockWise && this.angle <= 0 ? this.angle + 2 * Math.PI : this.angle;
 
         this.pointsLength = Math.floor(
-            Math.abs(0.5 * this.angle * this.radius) / Math.sqrt(arcTolerance * (2 * this.radius - arcTolerance))
+            Math.abs(0.5 * this.angle * this.radius) / Math.sqrt(this.tolerance * (2 * this.radius - this.tolerance))
         );
 
         this.segmentAngle = this.angle / this.pointsLength;

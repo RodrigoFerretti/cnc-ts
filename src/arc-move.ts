@@ -41,7 +41,7 @@ export class ArcMove extends Move {
         }
 
         const point = this.arc.getPoint({ index: this.currentPointIndex, speed: this.speed });
-        this.stepper.linearMove({ position: point.position[this.coordinate], speed: point.speed![this.coordinate] });
+        this.stepper.linearMove({ position: point.position[this.coordinate], speed: point.speed[this.coordinate] });
         this.currentPointIndex++;
     };
 }
