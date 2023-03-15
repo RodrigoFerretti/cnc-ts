@@ -27,6 +27,11 @@ export class LinearMove extends Move {
         if (this.status !== Move.Status.Moving) {
             return;
         }
+
+        if (this.stepper.distanceToGo() === 0) {
+            this.status = Move.Status.Completed;
+            return;
+        }
     };
 }
 
