@@ -53,7 +53,7 @@ export class Controller {
 
     public resume: Controller.Handler<GCode.Resume> = () => {
         const serviceStatus = this.service.getStatus();
-        if (serviceStatus !== Service.Status.Paused) "can only resume when paused";
+        if (serviceStatus !== Service.Status.Paused) return "can only resume when paused";
 
         return this.service.getStatus();
     };
