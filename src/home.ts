@@ -1,19 +1,16 @@
-import { Move } from ".";
-import { Sensor } from "../sensor";
-import { Stepper } from "../stepper";
+import { Move } from "./move";
+import { Sensor } from "./sensor";
+import { Stepper } from "./stepper";
 
 export class Home extends Move {
     private step: Home.Step;
-    private backMoveSpeed: number;
     private backMovePosition: number;
 
     public constructor(options: Home.Options) {
-        super({ stepper: options.stepper, sensors: options.sensors });
-
-        this.backMoveSpeed = 100;
-        this.backMovePosition = 100;
+        super({ stepper: options.stepper, sensors: options.sensors, speed: 100 });
 
         this.step = this.sensors[0].getReading() === true ? Home.Step.ACompleted : Home.Step.NotStarted;
+        this.backMovePosition = 100;
     }
 
     public loop = () => {
@@ -36,7 +33,7 @@ export class Home extends Move {
         }
 
         if (this.step === Home.Step.ACompleted) {
-            this.stepper.linearMove({ position: this.backMovePosition, speed: this.backMoveSpeed });
+            this.stepper.linearMove({ position: this.backMovePosition, speed: this.speed });
             this.step = Home.Step.BInProcess;
         }
 
@@ -47,7 +44,7 @@ export class Home extends Move {
         }
 
         if (this.step === Home.Step.BCompleted) {
-            this.stepper.linearMove({ position: -(this.backMovePosition * 2), speed: this.backMoveSpeed });
+            this.stepper.linearMove({ position: -(this.backMovePosition * 2), speed: this.speed });
             this.step = Home.Step.CInProcess;
         }
 

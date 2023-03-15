@@ -1,29 +1,27 @@
-import { Move } from ".";
-import { Arc } from "../lib/arc";
-import { Coordinate } from "../lib/coodinate";
-import { Sensor } from "../sensor";
-import { Stepper } from "../stepper";
+import { Move } from "./move";
+import { Arc } from "./arc";
+import { Coordinate } from "./coodinate";
+import { Sensor } from "./sensor";
+import { Stepper } from "./stepper";
 
 export class ArcMove extends Move {
     private arc: Arc;
-    private speed: number;
-    private maxSpeed: number;
     private coordinate: Coordinate.Abscissa | Coordinate.Ordinate;
-    private currentPoint: number;
+    private currentPointIndex: number;
 
     public constructor(options: ArcMove.Options) {
-        super({ stepper: options.stepper, sensors: options.sensors });
+        const maxSpeed = 200;
+        const speed = maxSpeed > options.speed! ? options.speed! : maxSpeed;
+
+        super({ stepper: options.stepper, sensors: options.sensors, speed });
 
         this.arc = options.arc;
-        this.maxSpeed = 200;
         this.coordinate = options.coordinate;
-        this.currentPoint = 0;
-
-        this.speed = this.maxSpeed > options.speed! ? options.speed! : this.maxSpeed;
+        this.currentPointIndex = 0;
     }
 
     public loop = () => {
-        if (this.getSensorsReading()) {
+        if (this.getSensorsReadings()) {
             this.stepper.linearMove({ position: this.stepper.getPosition() });
             this.status = Move.Status.SensorStopped;
             return;
@@ -33,7 +31,7 @@ export class ArcMove extends Move {
             return;
         }
 
-        if (this.currentPoint === this.arc.getPointsLenght()) {
+        if (this.currentPointIndex === this.arc.getPointsLenght()) {
             this.status = Move.Status.Completed;
             return;
         }
@@ -42,9 +40,9 @@ export class ArcMove extends Move {
             return;
         }
 
-        const point = this.arc.getPoint({ index: this.currentPoint, speed: this.speed });
+        const point = this.arc.getPoint({ index: this.currentPointIndex, speed: this.speed });
         this.stepper.linearMove({ position: point.position[this.coordinate], speed: point.speed![this.coordinate] });
-        this.currentPoint++;
+        this.currentPointIndex++;
     };
 }
 

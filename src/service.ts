@@ -1,11 +1,11 @@
 import { GCode } from "./gcode";
-import { Arc } from "./lib/arc";
-import { Coordinate } from "./lib/coodinate";
-import { Vector } from "./lib/vector";
+import { Arc } from "./arc";
+import { Coordinate } from "./coodinate";
+import { Vector } from "./vector";
 import { Sensor } from "./sensor";
-import { ArcMove } from "./move/arc-move";
-import { Home } from "./move/home";
-import { LinearMove } from "./move/linear-move";
+import { ArcMove } from "./arc-move";
+import { Home } from "./home";
+import { LinearMove } from "./linear-move";
 import { Stepper } from "./stepper";
 import { Move } from "./move";
 
@@ -200,10 +200,11 @@ export class Service {
             sensor.read();
         }, undefined);
 
-        const movesStatus = this.moves.reduce<Move.Status[]>((status, move) => {
+        this.moves.reduce<void>((_, move) => {
             move.loop();
-            return [...status, move.getStatus()];
-        }, []);
+        }, undefined);
+
+        const movesStatus = this.moves.map((move) => move.getStatus());
 
         if (movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
             this.status = Service.Status.Idle;

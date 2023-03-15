@@ -1,5 +1,5 @@
 import { GCode } from "./gcode";
-import { matchGroups } from "./lib/regex";
+import { matchGroups } from "./regex";
 import { Controller } from "./controller";
 
 export class Router {

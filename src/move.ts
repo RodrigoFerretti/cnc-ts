@@ -1,12 +1,14 @@
-import { Sensor } from "../sensor";
-import { Stepper } from "../stepper";
+import { Sensor } from "./sensor";
+import { Stepper } from "./stepper";
 
 export abstract class Move {
+    protected speed: number;
     protected status: Move.Status;
     protected stepper: Stepper;
     protected sensors: [Sensor, Sensor];
 
     public constructor(options: Move.Options) {
+        this.speed = options.speed;
         this.status = Move.Status.Moving;
         this.stepper = options.stepper;
         this.sensors = options.sensors;
@@ -16,7 +18,7 @@ export abstract class Move {
         return this.status;
     };
 
-    public getSensorsReading = () => {
+    public getSensorsReadings = () => {
         return this.sensors.reduce<boolean>((reading, sensor) => {
             return sensor.getReading() || reading;
         }, false);
@@ -27,6 +29,7 @@ export abstract class Move {
 
 export namespace Move {
     export type Options = {
+        speed: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
     };
