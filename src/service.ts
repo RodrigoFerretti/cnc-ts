@@ -1,19 +1,22 @@
 import { GCode } from "./gcode";
 import { Arc } from "./lib/arc";
+import { Coordinate } from "./lib/coodinate";
 import { Vector } from "./lib/vector";
 import { Sensor } from "./sensor";
-import { ArcMoveService } from "./service.arc-move";
-import { HomeService } from "./service.home";
+import { ArcMove } from "./move/arc-move";
+import { Home } from "./move/home";
+import { LinearMove } from "./move/linear-move";
 import { Stepper } from "./stepper";
+import { Move } from "./move";
 
 export class Service {
+    private moves: Move[];
     private status: Service.Status;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
-    private homeService: HomeService | undefined;
-    private arcMoveService: ArcMoveService | undefined;
 
     constructor(options: Service.Options) {
+        this.moves = [];
         this.status = Service.Status.Idle;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
@@ -25,7 +28,23 @@ export class Service {
 
     public home = () => {
         this.status = Service.Status.Homing;
-        this.homeService = new HomeService({ sensors: this.sensors, steppers: this.steppers });
+
+        this.moves = [
+            new Home({
+                stepper: this.steppers[0],
+                sensors: [this.sensors[0], this.sensors[1]],
+            }),
+
+            new Home({
+                stepper: this.steppers[1],
+                sensors: [this.sensors[2], this.sensors[3]],
+            }),
+
+            new Home({
+                stepper: this.steppers[2],
+                sensors: [this.sensors[4], this.sensors[5]],
+            }),
+        ];
     };
 
     public rapidMove = (gCode: GCode.RapidMove) => {
@@ -43,9 +62,25 @@ export class Service {
             gCode.z || currentPosition[2],
         ];
 
-        this.steppers[0].linearMove({ position: finalPosition[0] });
-        this.steppers[1].linearMove({ position: finalPosition[1] });
-        this.steppers[2].linearMove({ position: finalPosition[2] });
+        this.moves = [
+            new LinearMove({
+                stepper: this.steppers[0],
+                sensors: [this.sensors[0], this.sensors[1]],
+                position: finalPosition[0],
+            }),
+
+            new LinearMove({
+                stepper: this.steppers[1],
+                sensors: [this.sensors[2], this.sensors[3]],
+                position: finalPosition[1],
+            }),
+
+            new LinearMove({
+                stepper: this.steppers[2],
+                sensors: [this.sensors[4], this.sensors[5]],
+                position: finalPosition[2],
+            }),
+        ];
     };
 
     public linearMove = (gCode: GCode.LinearMove) => {
@@ -65,9 +100,28 @@ export class Service {
 
         const speed = gCode.f;
 
-        this.steppers[0].linearMove({ position: finalPosition[0], speed });
-        this.steppers[1].linearMove({ position: finalPosition[1], speed });
-        this.steppers[2].linearMove({ position: finalPosition[2], speed });
+        this.moves = [
+            new LinearMove({
+                stepper: this.steppers[0],
+                sensors: [this.sensors[0], this.sensors[1]],
+                position: finalPosition[0],
+                speed,
+            }),
+
+            new LinearMove({
+                stepper: this.steppers[1],
+                sensors: [this.sensors[2], this.sensors[3]],
+                position: finalPosition[1],
+                speed,
+            }),
+
+            new LinearMove({
+                stepper: this.steppers[2],
+                sensors: [this.sensors[4], this.sensors[5]],
+                position: finalPosition[2],
+                speed,
+            }),
+        ];
     };
 
     public arcMove = (gCode: GCode.ArcMove) => {
@@ -102,16 +156,32 @@ export class Service {
             initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
         });
 
-        this.arcMoveService = new ArcMoveService({
-            arc,
-            speed: gCode.f,
-            steppers: this.steppers,
-            coordinates: [abscissa, ordinate],
-        });
+        const speed = gCode.f;
 
-        const applicateSpeed = 0;
+        this.moves = [
+            new ArcMove({
+                arc,
+                stepper: this.steppers[abscissa],
+                sensors: [this.sensors[abscissa], this.sensors[abscissa + 1]],
+                coordinate: Coordinate.Abscissa,
+                speed,
+            }),
 
-        this.steppers[applicate].linearMove({ position: finalPosition[applicate], speed: applicateSpeed });
+            new ArcMove({
+                arc,
+                stepper: this.steppers[ordinate],
+                sensors: [this.sensors[ordinate], this.sensors[ordinate + 1]],
+                coordinate: Coordinate.Ordinate,
+                speed,
+            }),
+
+            new LinearMove({
+                stepper: this.steppers[applicate],
+                position: finalPosition[applicate],
+                sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
+                speed,
+            }),
+        ];
     };
 
     public pause = () => {
@@ -130,24 +200,19 @@ export class Service {
             sensor.read();
         }, undefined);
 
-        if (this.status === Service.Status.Homing && this.homeService !== undefined) {
-            this.homeService.loop();
-            const homeServiceStatus = this.homeService.getStatus();
-            this.status = homeServiceStatus === HomeService.Status.Completed ? Service.Status.Idle : this.status;
+        const movesStatus = this.moves.reduce<Move.Status[]>((status, move) => {
+            move.loop();
+            return [...status, move.getStatus()];
+        }, []);
+
+        if (movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
+            this.status = Service.Status.Idle;
+            this.moves = [];
         }
 
-        if (this.status === Service.Status.ArcMoving && this.arcMoveService !== undefined) {
-            this.arcMoveService.loop();
-            const arcMoveServiceStatus = this.arcMoveService.getStatus();
-            this.status = arcMoveServiceStatus === ArcMoveService.Status.Completed ? Service.Status.Idle : this.status;
-        }
-
-        if (this.status === Service.Status.LinearMoving || this.status === Service.Status.RapidMoving) {
-            const moving = this.steppers.reduce<boolean>((moving, stepper) => {
-                return stepper.distanceToGo() === 0 ? false : moving;
-            }, true);
-
-            this.status = moving === false ? Service.Status.Idle : this.status;
+        if (movesStatus.some((movesStatus) => movesStatus === Move.Status.SensorStopped)) {
+            this.status = Service.Status.SensorStopped;
+            this.moves = [];
         }
 
         this.steppers.reduce<void>((_, stepper) => {
@@ -164,6 +229,7 @@ export namespace Service {
         ArcMoving = "arc-moving",
         RapidMoving = "rapid-moving",
         LinearMoving = "linear-moving",
+        SensorStopped = "sensor-stopped",
     }
 
     export type Options = {
