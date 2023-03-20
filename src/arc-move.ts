@@ -22,7 +22,7 @@ export class ArcMove extends Move {
 
     public loop = () => {
         if (this.getSensorsReadings()) {
-            this.stepper.linearMove({ position: this.stepper.getPosition() });
+            this.stepper.stop();
             this.status = Move.Status.SensorStopped;
             return;
         }

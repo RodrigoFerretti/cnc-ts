@@ -11,6 +11,10 @@ export class Stepper {
         return this.position;
     };
 
+    public stop = () => {
+        this.linearMove({ position: this.getPosition() });
+    };
+
     public setPosition = (_options: Stepper.SetPositionOptions) => {};
 
     public distanceToGo = (): number => {
