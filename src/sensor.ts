@@ -1,12 +1,19 @@
+import { Gpio } from "pigpio";
+import { open } from "i2c-bus";
+
 export class Sensor {
+    private gpio: Gpio;
     private reading: boolean;
 
-    constructor() {
+    constructor(options: Sensor.Options) {
+        const pin = options.pin;
+
+        this.gpio = new Gpio(pin, { mode: Gpio.INPUT });
         this.reading = true;
     }
 
     public read = () => {
-        this.reading = true;
+        this.reading = Boolean(this.gpio.digitalRead());
     };
 
     public getReading = () => {
@@ -14,4 +21,10 @@ export class Sensor {
     };
 }
 
-export namespace Sensor {}
+export namespace Sensor {
+    export type Options = {
+        pin: number;
+    };
+
+    export const i2c = open(1, () => {});
+}
