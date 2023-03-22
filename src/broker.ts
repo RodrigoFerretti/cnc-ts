@@ -5,8 +5,8 @@ export class Broker extends EventEmitter {
         super();
     }
 
-    public on = (eventName: "message", handler: (message: string) => void) => {
-        return super.on(eventName, handler);
+    public on = (eventName: "message", listener: (message: string) => void) => {
+        return super.on(eventName, listener);
     };
 
     public emit = (eventName: "message", message: string) => {
