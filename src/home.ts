@@ -3,13 +3,13 @@ import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
 
 export class Home extends Move {
-    private step: Home.Step;
+    private stage: Home.Stage;
     private backMovePosition: number;
 
     public constructor(options: Home.Options) {
         super({ stepper: options.stepper, sensors: options.sensors, speed: 100 });
 
-        this.step = this.sensors[0].getReading() === true ? Home.Step.ACompleted : Home.Step.NotStarted;
+        this.stage = this.sensors[0].getReading() === true ? Home.Stage.ACompleted : Home.Stage.NotStarted;
         this.backMovePosition = 100;
     }
 
@@ -18,43 +18,43 @@ export class Home extends Move {
             return;
         }
 
-        if (this.step === Home.Step.NotStarted) {
+        if (this.stage === Home.Stage.NotStarted) {
             this.stepper.linearMove({ position: -100_000 });
-            this.step = Home.Step.AInProcess;
+            this.stage = Home.Stage.AInProcess;
         }
 
-        if (this.step === Home.Step.AInProcess) {
+        if (this.stage === Home.Stage.AInProcess) {
             if (this.sensors[0].getReading() === false) return;
 
             const currentPosition = this.stepper.getPosition();
             this.stepper.linearMove({ position: currentPosition });
             this.stepper.setPosition({ position: 0 });
-            this.step = Home.Step.ACompleted;
+            this.stage = Home.Stage.ACompleted;
         }
 
-        if (this.step === Home.Step.ACompleted) {
+        if (this.stage === Home.Stage.ACompleted) {
             this.stepper.linearMove({ position: this.backMovePosition, speed: this.speed });
-            this.step = Home.Step.BInProcess;
+            this.stage = Home.Stage.BInProcess;
         }
 
-        if (this.step === Home.Step.BInProcess) {
+        if (this.stage === Home.Stage.BInProcess) {
             if (this.stepper.distanceToGo() !== 0) return;
 
-            this.step = Home.Step.BCompleted;
+            this.stage = Home.Stage.BCompleted;
         }
 
-        if (this.step === Home.Step.BCompleted) {
+        if (this.stage === Home.Stage.BCompleted) {
             this.stepper.linearMove({ position: -(this.backMovePosition * 2), speed: this.speed });
-            this.step = Home.Step.CInProcess;
+            this.stage = Home.Stage.CInProcess;
         }
 
-        if (this.step === Home.Step.CInProcess) {
+        if (this.stage === Home.Stage.CInProcess) {
             if (this.sensors[0].getReading() === false) return;
 
             const currentPosition = this.stepper.getPosition();
             this.stepper.linearMove({ position: currentPosition });
             this.stepper.setPosition({ position: 0 });
-            this.step = Home.Step.CCompleted;
+            this.stage = Home.Stage.CCompleted;
             this.status = Move.Status.Completed;
         }
     };
@@ -66,7 +66,7 @@ export namespace Home {
         sensors: [Sensor, Sensor];
     };
 
-    export enum Step {
+    export enum Stage {
         NotStarted,
         AInProcess,
         ACompleted,
