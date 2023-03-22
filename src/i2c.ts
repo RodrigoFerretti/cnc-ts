@@ -19,11 +19,8 @@ export class I2C {
         this.reading = this.bus.readWordSync(this.address, this.command);
     };
 
-    public getReading = (options: I2C.GetReadingOptions) => {
-        const port = options.port;
-        this.reading / port;
-
-        return false;
+    public getReading = () => {
+        return this.reading;
     };
 }
 
@@ -31,9 +28,5 @@ export namespace I2C {
     export type Options = {
         address: number;
         busNumber: number;
-    };
-
-    export type GetReadingOptions = {
-        port: number;
     };
 }
