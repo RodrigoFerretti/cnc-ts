@@ -20,8 +20,6 @@ export class Stepper {
     public distanceToGo = (): number => {
         return 0;
     };
-
-    public step = () => {};
 }
 
 export namespace Stepper {

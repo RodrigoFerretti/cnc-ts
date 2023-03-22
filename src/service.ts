@@ -1,18 +1,16 @@
-import { GCode } from "./gcode";
 import { Arc } from "./arc";
-import { Coordinate } from "./coodinate";
-import { Vector } from "./vector";
-import { Sensor } from "./sensor";
 import { ArcMove } from "./arc-move";
+import { Broker } from "./broker";
+import { Coordinate } from "./coodinate";
+import { GCode } from "./gcode";
 import { Home } from "./home";
 import { LinearMove } from "./linear-move";
-import { Stepper } from "./stepper";
 import { Move } from "./move";
-import { I2C } from "./i2c";
-import { Broker } from "./broker";
+import { Sensor } from "./sensor";
+import { Stepper } from "./stepper";
+import { Vector } from "./vector";
 
 export class Service {
-    private i2c: I2C;
     private moves: Move[];
     private status: Service.Status;
     private broker: Broker;
@@ -20,7 +18,6 @@ export class Service {
     private steppers: [Stepper, Stepper, Stepper];
 
     constructor(options: Service.Options) {
-        this.i2c = options.i2c;
         this.moves = [];
         this.status = Service.Status.Idle;
         this.broker = options.broker;
@@ -204,8 +201,6 @@ export class Service {
     public resume = () => {};
 
     private loop = () => {
-        this.i2c.read();
-
         this.moves.reduce<void>((_, move) => {
             move.loop();
         }, undefined);
@@ -225,10 +220,6 @@ export class Service {
 
             this.broker.emit("message", this.status);
         }
-
-        this.steppers.reduce<void>((_, stepper) => {
-            stepper.step();
-        }, undefined);
     };
 }
 
@@ -244,7 +235,6 @@ export namespace Service {
     }
 
     export type Options = {
-        i2c: I2C;
         sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
         broker: Broker;
         steppers: [Stepper, Stepper, Stepper];
