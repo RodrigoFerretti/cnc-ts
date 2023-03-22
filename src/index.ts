@@ -4,21 +4,25 @@ import { Server } from "./server";
 import { Controller } from "./controller";
 import { Stepper } from "./stepper";
 import { Service } from "./service";
+import { I2C } from "./i2c";
 
 const stepperX = new Stepper();
 const stepperY = new Stepper();
 const stepperZ = new Stepper();
 
-const sensorXA = new Sensor();
-const sensorXB = new Sensor();
-const sensorYA = new Sensor();
-const sensorYB = new Sensor();
-const sensorZA = new Sensor();
-const sensorZB = new Sensor();
+const i2c = new I2C({ address: 0, busNumber: 1 });
+
+const sensorXA = new Sensor({ i2c, port: 0 });
+const sensorXB = new Sensor({ i2c, port: 1 });
+const sensorYA = new Sensor({ i2c, port: 2 });
+const sensorYB = new Sensor({ i2c, port: 3 });
+const sensorZA = new Sensor({ i2c, port: 4 });
+const sensorZB = new Sensor({ i2c, port: 5 });
 
 const service = new Service({
-    steppers: [stepperX, stepperY, stepperZ],
+    i2c,
     sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
+    steppers: [stepperX, stepperY, stepperZ],
 });
 
 const controller = new Controller({ service });

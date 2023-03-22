@@ -8,14 +8,17 @@ import { Home } from "./home";
 import { LinearMove } from "./linear-move";
 import { Stepper } from "./stepper";
 import { Move } from "./move";
+import { I2C } from "./i2c";
 
 export class Service {
+    private i2c: I2C;
     private moves: Move[];
     private status: Service.Status;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
 
     constructor(options: Service.Options) {
+        this.i2c = options.i2c;
         this.moves = [];
         this.status = Service.Status.Idle;
         this.sensors = options.sensors;
@@ -196,9 +199,7 @@ export class Service {
     public resume = () => {};
 
     public loop = () => {
-        this.sensors.reduce<void>((_, sensor) => {
-            sensor.read();
-        }, undefined);
+        this.i2c.read();
 
         this.moves.reduce<void>((_, move) => {
             move.loop();
@@ -234,6 +235,7 @@ export namespace Service {
     }
 
     export type Options = {
+        i2c: I2C;
         sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
         steppers: [Stepper, Stepper, Stepper];
     };
