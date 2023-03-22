@@ -10,7 +10,7 @@ export class Sensor {
     }
 
     public getReading = () => {
-        return Boolean(this.i2c.getReading().toString(2).charAt(this.port));
+        return Boolean(Number(this.i2c.getReading().toString(2).charAt(this.port)));
     };
 }
 

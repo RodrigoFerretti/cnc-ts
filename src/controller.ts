@@ -28,7 +28,7 @@ export class Controller {
 
     public linearMove: Controller.Handler<GCode.LinearMove> = (gCode) => {
         const serviceStatus = this.service.getStatus();
-        if (serviceStatus !== Service.Status.Idle) return "can only move when not moving";
+        if (serviceStatus !== Service.Status.Idle) return "can only move when idle";
 
         this.service.linearMove(gCode);
 
@@ -37,7 +37,7 @@ export class Controller {
 
     public arcMove: Controller.Handler<GCode.ArcMove> = (gCode) => {
         const serviceStatus = this.service.getStatus();
-        if (serviceStatus !== Service.Status.Idle) return "can only move when not moving";
+        if (serviceStatus !== Service.Status.Idle) return "can only move when idle";
 
         this.service.arcMove(gCode);
 

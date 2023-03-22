@@ -209,7 +209,7 @@ export class Service {
 
         const movesStatus = this.moves.map((move) => move.getStatus());
 
-        if (movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
+        if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
             this.status = Service.Status.Idle;
             this.moves = [];
         }
