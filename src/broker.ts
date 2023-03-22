@@ -1,15 +1,17 @@
 import { EventEmitter } from "stream";
 
-export class Broker extends EventEmitter {
+export class Broker {
+    private eventEmitter: EventEmitter;
+
     constructor() {
-        super();
+        this.eventEmitter = new EventEmitter();
     }
 
     public on = (eventName: "message", listener: (message: string) => void) => {
-        return super.on(eventName, listener);
+        return this.eventEmitter.on(eventName, listener);
     };
 
     public emit = (eventName: "message", message: string) => {
-        return super.emit(eventName, message);
+        return this.eventEmitter.emit(eventName, message);
     };
 }
