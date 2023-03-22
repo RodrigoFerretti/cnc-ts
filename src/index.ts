@@ -1,10 +1,11 @@
+import { Broker } from "./broker";
+import { Controller } from "./controller";
+import { I2C } from "./i2c";
 import { Router } from "./router";
 import { Sensor } from "./sensor";
 import { Server } from "./server";
-import { Controller } from "./controller";
-import { Stepper } from "./stepper";
 import { Service } from "./service";
-import { I2C } from "./i2c";
+import { Stepper } from "./stepper";
 
 const stepperX = new Stepper();
 const stepperY = new Stepper();
@@ -19,9 +20,12 @@ const sensorYB = new Sensor({ i2c, port: 3 });
 const sensorZA = new Sensor({ i2c, port: 4 });
 const sensorZB = new Sensor({ i2c, port: 5 });
 
+const broker = new Broker();
+
 const service = new Service({
     i2c,
     sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
+    broker,
     steppers: [stepperX, stepperY, stepperZ],
 });
 
@@ -29,6 +33,6 @@ const controller = new Controller({ service });
 
 const router = new Router({ controller });
 
-const server = new Server({ router });
+const server = new Server({ router, broker });
 
 server;

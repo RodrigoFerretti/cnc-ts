@@ -1,14 +1,16 @@
 import { WebSocketServer } from "ws";
+import { Broker } from "./broker";
 import { Router } from "./router";
 
 export class Server extends WebSocketServer {
     constructor(options: Server.Options) {
         const router = options.router;
+        const broker = options.broker;
 
-        super({ port: 8080 }, () => console.log("websocket server running on port 8080"));
+        super({ port: 8080 }, () => console.log("Websocket server running on port 8080"));
 
         this.on("connection", (webSocket) => {
-            webSocket.send("connected", {}, this.handleError);
+            webSocket.send("connected");
 
             webSocket.on("message", (data) => {
                 const requestMessage = data.toString();
@@ -17,13 +19,18 @@ export class Server extends WebSocketServer {
                 webSocket.send(responseMessage);
             });
         });
-    }
 
-    private handleError = (_error: Error | undefined) => {};
+        broker.on("message", (message) => {
+            this.clients.forEach((webSocket) => {
+                webSocket.send(message);
+            });
+        });
+    }
 }
 
 export namespace Server {
     export type Options = {
         router: Router;
+        broker: Broker;
     };
 }

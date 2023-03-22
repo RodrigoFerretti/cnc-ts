@@ -9,11 +9,13 @@ import { LinearMove } from "./linear-move";
 import { Stepper } from "./stepper";
 import { Move } from "./move";
 import { I2C } from "./i2c";
+import { Broker } from "./broker";
 
 export class Service {
     private i2c: I2C;
     private moves: Move[];
     private status: Service.Status;
+    private broker: Broker;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
 
@@ -21,6 +23,7 @@ export class Service {
         this.i2c = options.i2c;
         this.moves = [];
         this.status = Service.Status.Idle;
+        this.broker = options.broker;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
 
@@ -212,11 +215,15 @@ export class Service {
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
             this.status = Service.Status.Idle;
             this.moves = [];
+
+            this.broker.emit("message", this.status);
         }
 
         if (movesStatus.some((movesStatus) => movesStatus === Move.Status.SensorStopped)) {
             this.status = Service.Status.SensorStopped;
             this.moves = [];
+
+            this.broker.emit("message", this.status);
         }
 
         this.steppers.reduce<void>((_, stepper) => {
@@ -239,6 +246,7 @@ export namespace Service {
     export type Options = {
         i2c: I2C;
         sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
+        broker: Broker;
         steppers: [Stepper, Stepper, Stepper];
     };
 }
