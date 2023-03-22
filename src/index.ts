@@ -7,9 +7,9 @@ import { Server } from "./server";
 import { Service } from "./service";
 import { Stepper } from "./stepper";
 
-const stepperX = new Stepper();
-const stepperY = new Stepper();
-const stepperZ = new Stepper();
+const stepperX = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
+const stepperY = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
+const stepperZ = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
 
 const i2c = new I2C({ address: 0, busNumber: 1 });
 

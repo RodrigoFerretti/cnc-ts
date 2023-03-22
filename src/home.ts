@@ -26,8 +26,7 @@ export class Home extends Move {
         if (this.stage === Home.Stage.AInProcess) {
             if (this.sensors[0].getReading() === false) return;
 
-            const currentPosition = this.stepper.getPosition();
-            this.stepper.linearMove({ position: currentPosition });
+            this.stepper.stop();
             this.stepper.setPosition({ position: 0 });
             this.stage = Home.Stage.ACompleted;
         }
@@ -38,7 +37,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.BInProcess) {
-            if (this.stepper.distanceToGo() !== 0) return;
+            if (this.stepper.isMoving()) return;
 
             this.stage = Home.Stage.BCompleted;
         }
@@ -51,8 +50,7 @@ export class Home extends Move {
         if (this.stage === Home.Stage.CInProcess) {
             if (this.sensors[0].getReading() === false) return;
 
-            const currentPosition = this.stepper.getPosition();
-            this.stepper.linearMove({ position: currentPosition });
+            this.stepper.stop();
             this.stepper.setPosition({ position: 0 });
             this.stage = Home.Stage.CCompleted;
             this.status = Move.Status.Completed;

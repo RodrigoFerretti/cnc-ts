@@ -36,7 +36,7 @@ export class ArcMove extends Move {
             return;
         }
 
-        if (this.stepper.distanceToGo() !== 0) {
+        if (this.stepper.isMoving()) {
             return;
         }
 
