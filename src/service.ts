@@ -23,6 +23,8 @@ export class Service {
         this.status = Service.Status.Idle;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
+
+        setInterval(this.loop);
     }
 
     public getStatus = () => {
@@ -198,7 +200,7 @@ export class Service {
 
     public resume = () => {};
 
-    public loop = () => {
+    private loop = () => {
         this.i2c.read();
 
         this.moves.reduce<void>((_, move) => {

@@ -16,7 +16,11 @@ export class I2C {
     }
 
     public read = () => {
-        this.reading = this.bus.readWordSync(this.address, this.command);
+        try {
+            this.reading = this.bus.readWordSync(this.address, this.command);
+        } catch (error: any) {
+            this.reading = 0;
+        }
     };
 
     public getReading = () => {
