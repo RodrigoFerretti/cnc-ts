@@ -23,7 +23,6 @@ const sensorZB = new Sensor({ i2c, port: 5 });
 const broker = new Broker();
 
 const service = new Service({
-    i2c,
     sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
     broker,
     steppers: [stepperX, stepperY, stepperZ],
