@@ -18,7 +18,7 @@ export class Service {
     private broker: Broker;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
-    private loopStatus: boolean;
+    private loopStatus: Service.LoopStatus;
 
     constructor(options: Service.Options) {
         this.i2c = options.i2c;
@@ -27,10 +27,10 @@ export class Service {
         this.broker = options.broker;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
-        this.loopStatus = true;
+        this.loopStatus = Service.LoopStatus.Clear;
 
         setInterval(() => {
-            if (!this.loopStatus) return;
+            if (this.loopStatus === Service.LoopStatus.Running) return;
             this.loop();
         });
     }
@@ -215,7 +215,7 @@ export class Service {
     public resume = () => {};
 
     private loop = () => {
-        this.loopStatus = false;
+        this.loopStatus = Service.LoopStatus.Running;
 
         this.i2c.read();
 
@@ -247,7 +247,7 @@ export class Service {
 
         console.log(`x: ${currentPosition[0]} y: ${currentPosition[1]} z: ${currentPosition[2]}`);
 
-        this.loopStatus = true;
+        this.loopStatus = Service.LoopStatus.Clear;
     };
 }
 
@@ -260,6 +260,11 @@ export namespace Service {
         RapidMoving = "rapid-moving",
         LinearMoving = "linear-moving",
         SensorStopped = "sensor-stopped",
+    }
+
+    export enum LoopStatus {
+        Running = "running",
+        Clear = "clear",
     }
 
     export type Options = {
