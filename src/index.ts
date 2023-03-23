@@ -9,9 +9,9 @@ import { Stepper } from "./stepper";
 
 const gpioMock = { write: async (..._args: any[]) => {}, writeSync: (..._args: any[]) => {} } as never;
 
-const stepperX = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
-const stepperY = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
-const stepperZ = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
+const stepperX = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 15000 });
+const stepperY = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 15000 });
+const stepperZ = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 15000 });
 
 const i2cBusMock = { readWordSync: (..._args: any[]) => 0 } as never;
 

@@ -18,6 +18,7 @@ export class Service {
     private broker: Broker;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
+    private loopStatus: boolean;
 
     constructor(options: Service.Options) {
         this.i2c = options.i2c;
@@ -26,8 +27,12 @@ export class Service {
         this.broker = options.broker;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
+        this.loopStatus = true;
 
-        setInterval(this.loop);
+        setInterval(() => {
+            if (!this.loopStatus) return;
+            this.loop();
+        });
     }
 
     public getStatus = () => {
@@ -71,9 +76,9 @@ export class Service {
         ];
 
         const finalPosition: Vector<3> = [
-            gCode.x || currentPosition[0],
-            gCode.y || currentPosition[1],
-            gCode.z || currentPosition[2],
+            gCode.x !== undefined ? gCode.x : currentPosition[0],
+            gCode.y !== undefined ? gCode.y : currentPosition[1],
+            gCode.z !== undefined ? gCode.z : currentPosition[2],
         ];
 
         this.moves = [
@@ -107,9 +112,9 @@ export class Service {
         ];
 
         const finalPosition: Vector<3> = [
-            gCode.x || currentPosition[0],
-            gCode.y || currentPosition[1],
-            gCode.z || currentPosition[2],
+            gCode.x !== undefined ? gCode.x : currentPosition[0],
+            gCode.y !== undefined ? gCode.y : currentPosition[1],
+            gCode.z !== undefined ? gCode.z : currentPosition[2],
         ];
 
         const speed = gCode.f;
@@ -148,15 +153,15 @@ export class Service {
         ];
 
         const centerPosition: Vector<3> = [
-            currentPosition[0] + (gCode.i || 0),
-            currentPosition[1] + (gCode.j || 0),
-            currentPosition[2] + (gCode.k || 0),
+            currentPosition[0] + (gCode.i !== undefined ? gCode.i : 0),
+            currentPosition[1] + (gCode.j !== undefined ? gCode.j : 0),
+            currentPosition[2] + (gCode.k !== undefined ? gCode.k : 0),
         ];
 
         const finalPosition: Vector<3> = [
-            gCode.x || currentPosition[0],
-            gCode.y || currentPosition[1],
-            gCode.z || currentPosition[2],
+            gCode.x !== undefined ? gCode.x : currentPosition[0],
+            gCode.y !== undefined ? gCode.y : currentPosition[1],
+            gCode.z !== undefined ? gCode.z : currentPosition[2],
         ];
 
         const abscissa = gCode.i !== undefined ? 0 : 1;
@@ -210,6 +215,8 @@ export class Service {
     public resume = () => {};
 
     private loop = () => {
+        this.loopStatus = false;
+
         this.i2c.read();
 
         this.moves.reduce<void>((_, move) => {
@@ -231,6 +238,16 @@ export class Service {
 
             this.broker.emit("message", this.status);
         }
+
+        const currentPosition: Vector<3> = [
+            this.steppers[0].getPosition(),
+            this.steppers[1].getPosition(),
+            this.steppers[2].getPosition(),
+        ];
+
+        console.log(`x: ${currentPosition[0]} y: ${currentPosition[1]} z: ${currentPosition[2]}`);
+
+        this.loopStatus = true;
     };
 }
 

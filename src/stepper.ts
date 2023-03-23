@@ -44,8 +44,6 @@ export class Stepper {
                 await setTimeout(delay);
 
                 this.currentPosition = this.currentPosition + (distance > 0 ? 1 : -1);
-
-                console.log(`position: ${this.currentPosition} i: ${i}`);
             }
 
             await this.enaPin.write(1);
