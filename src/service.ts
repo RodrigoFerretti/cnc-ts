@@ -215,6 +215,16 @@ export class Service {
             this.broker.emit("message", this.status);
         }
 
+        const currentPosition: Vector<3> = [
+            this.steppers[0].getPosition(),
+            this.steppers[1].getPosition(),
+            this.steppers[2].getPosition(),
+        ];
+
+        if (this.status !== Service.Status.Idle) {
+            console.log(`x:${currentPosition[0]} y:${currentPosition[1]} z:${currentPosition[2]}`);
+        }
+
         this.loopStatus = Service.LoopStatus.Clear;
     };
 }
