@@ -19,7 +19,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.NotStarted) {
-            this.stepper.linearMove({ position: -100_000, speed: 300000 });
+            this.stepper.move({ position: -100_000, speed: this.stepper.getMaxSpeed() });
             this.stage = Home.Stage.AInProcess;
         }
 
@@ -32,7 +32,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.ACompleted) {
-            this.stepper.linearMove({ position: this.retractPosition, speed: this.speed });
+            this.stepper.move({ position: this.retractPosition, speed: this.speed });
             this.stage = Home.Stage.BInProcess;
         }
 
@@ -43,7 +43,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.BCompleted) {
-            this.stepper.linearMove({ position: -(this.retractPosition * 2), speed: this.speed });
+            this.stepper.move({ position: -(this.retractPosition * 2), speed: this.speed });
             this.stage = Home.Stage.CInProcess;
         }
 

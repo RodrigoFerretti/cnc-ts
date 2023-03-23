@@ -38,7 +38,7 @@ export class ArcMove extends Move {
         }
 
         const point = this.arc.getPoint({ index: this.currentPointIndex, speed: this.speed });
-        this.stepper.linearMove({ position: point.position[this.coordinate], speed: point.speed[this.coordinate] });
+        this.stepper.move({ position: point.position[this.coordinate], speed: point.speed[this.coordinate] });
         this.currentPointIndex++;
     };
 }
@@ -46,7 +46,7 @@ export class ArcMove extends Move {
 export namespace ArcMove {
     export type Options = {
         arc: Arc;
-        speed?: number;
+        speed: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
         coordinate: Coordinate.Abscissa | Coordinate.Ordinate;

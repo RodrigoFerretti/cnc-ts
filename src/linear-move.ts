@@ -6,7 +6,7 @@ export class LinearMove extends Move {
     public constructor(options: LinearMove.Options) {
         super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
-        this.stepper.linearMove({ position: options.position, speed: this.speed });
+        this.stepper.move({ position: options.position, speed: this.speed });
     }
 
     public loop = () => {

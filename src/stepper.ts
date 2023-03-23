@@ -3,63 +3,65 @@ import { EventEmitter } from "stream";
 import { setTimeout } from "timers/promises";
 
 export class Stepper {
-    private moving: boolean;
     private maxSpeed: number;
     private pulsePin: Gpio;
+    private _isMoving: boolean;
     private enablePin: Gpio;
     private directionPin: Gpio;
     private eventEmitter: EventEmitter;
     private currentPosition: number;
 
     constructor(options: Stepper.Options) {
-        this.moving = false;
         this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
+        this._isMoving = false;
         this.enablePin = options.enablePin;
         this.directionPin = options.directionPin;
         this.eventEmitter = new EventEmitter();
         this.currentPosition = 0;
 
-        this.enablePin.writeSync(1);
+        this.enablePin.writeSync(Stepper.Enable.Off);
     }
 
-    public linearMove = (options: Stepper.LinearMoveOptions) => {
+    public move = (options: Stepper.MoveOptions) => {
         const targetPosition = options.position;
         const distance = targetPosition - this.currentPosition;
         const speed = options.speed;
         const time = distance / speed;
-        const toAdd = distance > 0 ? 1 : -1;
-        const direction = distance > 0 ? 0 : 1;
+        const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
         const pulseDelay = Math.abs(time / (distance * 2));
+        const positionIncrement = distance > 0 ? 1 : -1;
 
-        this.moving = true;
+        this._isMoving = true;
 
         return new Promise<void>(async (resolve) => {
-            this.eventEmitter.on("stop", resolve);
+            this.eventEmitter.on("stop", () => {
+                this._isMoving = false;
+                resolve();
+            });
 
-            await this.enablePin.write(0);
+            await this.enablePin.write(Stepper.Enable.On);
             await this.directionPin.write(direction);
 
             const startTime = performance.now();
             let adjustedPulseDelay = pulseDelay;
 
             for (let i = 0; i < Math.abs(distance); i++) {
-                this.pulsePin.writeSync(1);
+                this.pulsePin.writeSync(Stepper.Pulse.On);
                 await setTimeout(adjustedPulseDelay);
-                this.pulsePin.writeSync(0);
+                this.pulsePin.writeSync(Stepper.Pulse.Off);
                 await setTimeout(adjustedPulseDelay);
 
-                this.currentPosition = this.currentPosition + toAdd;
+                this.currentPosition = this.currentPosition + positionIncrement;
 
                 const difference = performance.now() - startTime - 2 * pulseDelay * (i + 1);
-
                 adjustedPulseDelay = adjustedPulseDelay - difference / 2;
             }
 
-            await this.enablePin.write(1);
+            await this.enablePin.write(Stepper.Enable.On);
 
-            this.moving = false;
-            return resolve();
+            this._isMoving = false;
+            resolve();
         });
     };
 
@@ -68,7 +70,6 @@ export class Stepper {
     };
 
     public stop = () => {
-        this.moving = false;
         this.eventEmitter.emit("stop");
     };
 
@@ -81,11 +82,26 @@ export class Stepper {
     };
 
     public isMoving = (): boolean => {
-        return this.moving;
+        return this._isMoving;
     };
 }
 
 export namespace Stepper {
+    export enum Pulse {
+        On = 1,
+        Off = 0,
+    }
+
+    export enum Enable {
+        On,
+        Off,
+    }
+
+    export enum Direction {
+        Forwards,
+        Backwards,
+    }
+
     export type Options = {
         maxSpeed: number;
         pulsePin: Gpio;
@@ -93,7 +109,7 @@ export namespace Stepper {
         directionPin: Gpio;
     };
 
-    export type LinearMoveOptions = {
+    export type MoveOptions = {
         speed: number;
         position: number;
     };
