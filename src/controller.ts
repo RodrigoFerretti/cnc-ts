@@ -21,7 +21,7 @@ export class Controller {
         const serviceStatus = this.service.getStatus();
         if (serviceStatus !== Service.Status.Idle) return "can only move when idle";
 
-        this.service.rapidMove(gCode);
+        this.service.linearMove(gCode);
 
         return this.service.getStatus();
     };

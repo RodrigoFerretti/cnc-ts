@@ -66,62 +66,7 @@ export class Service {
         ];
     };
 
-    public rapidMove = (gCode: GCode.RapidMove) => {
-        this.status = Service.Status.RapidMoving;
-
-        const currentPosition: Vector<3> = [
-            this.steppers[0].getPosition(),
-            this.steppers[1].getPosition(),
-            this.steppers[2].getPosition(),
-        ];
-
-        const finalPosition: Vector<3> = [
-            gCode.x !== undefined ? gCode.x : currentPosition[0],
-            gCode.y !== undefined ? gCode.y : currentPosition[1],
-            gCode.z !== undefined ? gCode.z : currentPosition[2],
-        ];
-
-        const distance: Vector<3> = [
-            finalPosition[0] - currentPosition[0],
-            finalPosition[1] - currentPosition[1],
-            finalPosition[2] - currentPosition[2],
-        ];
-
-        const distanceMagnitude = Math.sqrt(
-            Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
-        );
-
-        const speedMagnitude = 200;
-
-        const time = Math.ceil(distanceMagnitude / speedMagnitude) * 1000;
-
-        const speed: Vector<3> = [distance[0] / time, distance[1] / time, distance[2] / time];
-
-        this.moves = [
-            new LinearMove({
-                speed: speed[0],
-                stepper: this.steppers[0],
-                sensors: [this.sensors[0], this.sensors[1]],
-                position: finalPosition[0],
-            }),
-
-            new LinearMove({
-                speed: speed[1],
-                stepper: this.steppers[1],
-                sensors: [this.sensors[2], this.sensors[3]],
-                position: finalPosition[1],
-            }),
-
-            new LinearMove({
-                speed: speed[2],
-                stepper: this.steppers[2],
-                sensors: [this.sensors[4], this.sensors[5]],
-                position: finalPosition[2],
-            }),
-        ];
-    };
-
-    public linearMove = (gCode: GCode.LinearMove) => {
+    public linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
         this.status = Service.Status.LinearMoving;
 
         const currentPosition: Vector<3> = [
@@ -142,14 +87,12 @@ export class Service {
             finalPosition[2] - currentPosition[2],
         ];
 
+        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 200;
         const distanceMagnitude = Math.sqrt(
             Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
         );
 
-        const speedMagnitude = gCode.f || 200;
-
         const time = Math.ceil(distanceMagnitude / speedMagnitude) * 1000;
-
         const speed: Vector<3> = [distance[0] / time, distance[1] / time, distance[2] / time];
 
         this.moves = [
@@ -208,12 +151,12 @@ export class Service {
             initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
         });
 
-        const speed = gCode.f || 200;
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : 200;
 
         this.moves = [
             new ArcMove({
                 arc,
-                speed,
+                speed: speedMagnitude,
                 stepper: this.steppers[abscissa],
                 sensors: [this.sensors[abscissa], this.sensors[abscissa + 1]],
                 coordinate: Coordinate.Abscissa,
@@ -221,14 +164,14 @@ export class Service {
 
             new ArcMove({
                 arc,
-                speed,
+                speed: speedMagnitude,
                 stepper: this.steppers[ordinate],
                 sensors: [this.sensors[ordinate], this.sensors[ordinate + 1]],
                 coordinate: Coordinate.Ordinate,
             }),
 
             new LinearMove({
-                speed,
+                speed: speedMagnitude,
                 stepper: this.steppers[applicate],
                 sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
                 position: finalPosition[applicate],
