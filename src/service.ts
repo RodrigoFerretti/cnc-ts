@@ -81,20 +81,39 @@ export class Service {
             gCode.z !== undefined ? gCode.z : currentPosition[2],
         ];
 
+        const distance: Vector<3> = [
+            finalPosition[0] - currentPosition[0],
+            finalPosition[1] - currentPosition[1],
+            finalPosition[2] - currentPosition[2],
+        ];
+
+        const distanceMagnitude = Math.sqrt(
+            Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
+        );
+
+        const speedMagnitude = 200;
+
+        const time = Math.ceil(distanceMagnitude / speedMagnitude) * 1000;
+
+        const speed: Vector<3> = [distance[0] / time, distance[1] / time, distance[2] / time];
+
         this.moves = [
             new LinearMove({
+                speed: speed[0],
                 stepper: this.steppers[0],
                 sensors: [this.sensors[0], this.sensors[1]],
                 position: finalPosition[0],
             }),
 
             new LinearMove({
+                speed: speed[1],
                 stepper: this.steppers[1],
                 sensors: [this.sensors[2], this.sensors[3]],
                 position: finalPosition[1],
             }),
 
             new LinearMove({
+                speed: speed[2],
                 stepper: this.steppers[2],
                 sensors: [this.sensors[4], this.sensors[5]],
                 position: finalPosition[2],
@@ -117,28 +136,42 @@ export class Service {
             gCode.z !== undefined ? gCode.z : currentPosition[2],
         ];
 
-        const speed = gCode.f;
+        const distance: Vector<3> = [
+            finalPosition[0] - currentPosition[0],
+            finalPosition[1] - currentPosition[1],
+            finalPosition[2] - currentPosition[2],
+        ];
+
+        const distanceMagnitude = Math.sqrt(
+            Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
+        );
+
+        const speedMagnitude = gCode.f || 200;
+
+        const time = Math.ceil(distanceMagnitude / speedMagnitude) * 1000;
+
+        const speed: Vector<3> = [distance[0] / time, distance[1] / time, distance[2] / time];
 
         this.moves = [
             new LinearMove({
+                speed: speed[0],
                 stepper: this.steppers[0],
                 sensors: [this.sensors[0], this.sensors[1]],
                 position: finalPosition[0],
-                speed,
             }),
 
             new LinearMove({
+                speed: speed[1],
                 stepper: this.steppers[1],
                 sensors: [this.sensors[2], this.sensors[3]],
                 position: finalPosition[1],
-                speed,
             }),
 
             new LinearMove({
+                speed: speed[2],
                 stepper: this.steppers[2],
                 sensors: [this.sensors[4], this.sensors[5]],
                 position: finalPosition[2],
-                speed,
             }),
         ];
     };
@@ -175,30 +208,30 @@ export class Service {
             initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
         });
 
-        const speed = gCode.f;
+        const speed = gCode.f || 200;
 
         this.moves = [
             new ArcMove({
                 arc,
+                speed,
                 stepper: this.steppers[abscissa],
                 sensors: [this.sensors[abscissa], this.sensors[abscissa + 1]],
                 coordinate: Coordinate.Abscissa,
-                speed,
             }),
 
             new ArcMove({
                 arc,
+                speed,
                 stepper: this.steppers[ordinate],
                 sensors: [this.sensors[ordinate], this.sensors[ordinate + 1]],
                 coordinate: Coordinate.Ordinate,
-                speed,
             }),
 
             new LinearMove({
-                stepper: this.steppers[applicate],
-                position: finalPosition[applicate],
-                sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
                 speed,
+                stepper: this.steppers[applicate],
+                sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
+                position: finalPosition[applicate],
             }),
         ];
     };
@@ -245,7 +278,9 @@ export class Service {
             this.steppers[2].getPosition(),
         ];
 
-        console.log(`x: ${currentPosition[0]} y: ${currentPosition[1]} z: ${currentPosition[2]}`);
+        if (this.status !== Service.Status.Idle) {
+            console.log(`x: ${currentPosition[0]} y: ${currentPosition[1]} z: ${currentPosition[2]}`);
+        }
 
         this.loopStatus = Service.LoopStatus.Clear;
     };
@@ -263,14 +298,14 @@ export namespace Service {
     }
 
     export enum LoopStatus {
-        Running = "running",
         Clear = "clear",
+        Running = "running",
     }
 
     export type Options = {
         i2c: I2C;
-        sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
         broker: Broker;
+        sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
         steppers: [Stepper, Stepper, Stepper];
     };
 }

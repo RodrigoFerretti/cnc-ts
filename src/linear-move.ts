@@ -29,7 +29,7 @@ export class LinearMove extends Move {
 
 export namespace LinearMove {
     export type Options = {
-        speed?: number;
+        speed: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
         position: number;
