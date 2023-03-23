@@ -1,4 +1,4 @@
-import { I2CBus, open } from "i2c-bus";
+import { I2CBus } from "i2c-bus";
 
 export class I2C {
     private bus: I2CBus;
@@ -7,17 +7,13 @@ export class I2C {
     private command: number;
 
     constructor(options: I2C.Options) {
-        const busNumer = options.busNumber;
-
-        this.bus = open(busNumer, () => {});
+        this.bus = options.bus;
         this.reading = 0;
         this.address = options.address;
         this.command = 0;
-
-        setInterval(this.read);
     }
 
-    private read = () => {
+    public read = () => {
         this.reading = this.bus.readWordSync(this.address, this.command);
     };
 
@@ -29,6 +25,6 @@ export class I2C {
 export namespace I2C {
     export type Options = {
         address: number;
-        busNumber: number;
+        bus: I2CBus;
     };
 }

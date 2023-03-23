@@ -1,19 +1,12 @@
+import { Move } from "./move";
 import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
-import { Move } from "./move";
 
 export class LinearMove extends Move {
-    private position: number;
-
     public constructor(options: LinearMove.Options) {
-        const maxSpeed = 200;
-        const speed = maxSpeed > options.speed! ? options.speed! : maxSpeed;
+        super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
-        super({ stepper: options.stepper, sensors: options.sensors, speed });
-
-        this.position = options.position;
-
-        this.stepper.linearMove({ position: this.position, speed: this.speed });
+        this.stepper.linearMove({ position: options.position, speed: this.speed });
     }
 
     public loop = () => {

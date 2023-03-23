@@ -12,9 +12,9 @@ export class Stepper {
     private currentPosition: number;
 
     constructor(options: Stepper.Options) {
-        this.dirPin = new Gpio(options.dirPin, "out");
-        this.pulPin = new Gpio(options.pulPin, "out");
-        this.enaPin = new Gpio(options.enaPin, "out");
+        this.dirPin = options.dirPin;
+        this.pulPin = options.pulPin;
+        this.enaPin = options.enaPin;
         this.moving = false;
         this.maxSpeed = options.maxSpeed;
         this.eventEmitter = new EventEmitter();
@@ -44,6 +44,8 @@ export class Stepper {
                 await setTimeout(delay);
 
                 this.currentPosition = this.currentPosition + (distance > 0 ? 1 : -1);
+
+                console.log(`position: ${this.currentPosition} i: ${i}`);
             }
 
             await this.enaPin.write(1);
@@ -66,6 +68,10 @@ export class Stepper {
         this.currentPosition = options.position;
     };
 
+    public getMaxSpeed = () => {
+        return this.maxSpeed;
+    };
+
     public isMoving = (): boolean => {
         return this.moving;
     };
@@ -73,9 +79,9 @@ export class Stepper {
 
 export namespace Stepper {
     export type Options = {
-        dirPin: number;
-        pulPin: number;
-        enaPin: number;
+        dirPin: Gpio;
+        pulPin: Gpio;
+        enaPin: Gpio;
         maxSpeed: number;
     };
 

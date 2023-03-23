@@ -10,10 +10,7 @@ export class ArcMove extends Move {
     private currentPointIndex: number;
 
     public constructor(options: ArcMove.Options) {
-        const maxSpeed = 200;
-        const speed = maxSpeed > options.speed! ? options.speed! : maxSpeed;
-
-        super({ stepper: options.stepper, sensors: options.sensors, speed });
+        super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
         this.arc = options.arc;
         this.coordinate = options.coordinate;

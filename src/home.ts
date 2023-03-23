@@ -4,13 +4,13 @@ import { Stepper } from "./stepper";
 
 export class Home extends Move {
     private stage: Home.Stage;
-    private backMovePosition: number;
+    private retractPosition: number;
 
     public constructor(options: Home.Options) {
-        super({ stepper: options.stepper, sensors: options.sensors, speed: 100 });
+        super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
         this.stage = this.sensors[0].getReading() === true ? Home.Stage.ACompleted : Home.Stage.NotStarted;
-        this.backMovePosition = 100;
+        this.retractPosition = options.retractPosition;
     }
 
     public loop = () => {
@@ -32,7 +32,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.ACompleted) {
-            this.stepper.linearMove({ position: this.backMovePosition, speed: this.speed });
+            this.stepper.linearMove({ position: this.retractPosition, speed: this.speed });
             this.stage = Home.Stage.BInProcess;
         }
 
@@ -43,7 +43,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.BCompleted) {
-            this.stepper.linearMove({ position: -(this.backMovePosition * 2), speed: this.speed });
+            this.stepper.linearMove({ position: -(this.retractPosition * 2), speed: this.speed });
             this.stage = Home.Stage.CInProcess;
         }
 
@@ -60,8 +60,10 @@ export class Home extends Move {
 
 export namespace Home {
     export type Options = {
+        speed: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
+        retractPosition: number;
     };
 
     export enum Stage {

@@ -8,7 +8,8 @@ export abstract class Move {
     protected sensors: [Sensor, Sensor];
 
     public constructor(options: Move.Options) {
-        this.speed = options.speed;
+        const maxSpeed = options.stepper.getMaxSpeed();
+        this.speed = maxSpeed > options.speed! ? options.speed! : maxSpeed;
         this.status = Move.Status.Moving;
         this.stepper = options.stepper;
         this.sensors = options.sensors;
@@ -29,7 +30,7 @@ export abstract class Move {
 
 export namespace Move {
     export type Options = {
-        speed: number;
+        speed?: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
     };

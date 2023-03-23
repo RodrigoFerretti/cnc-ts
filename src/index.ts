@@ -7,11 +7,15 @@ import { Server } from "./server";
 import { Service } from "./service";
 import { Stepper } from "./stepper";
 
-const stepperX = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
-const stepperY = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
-const stepperZ = new Stepper({ dirPin: 0, enaPin: 0, pulPin: 0, maxSpeed: 100 });
+const gpioMock = { write: async (..._args: any[]) => {}, writeSync: (..._args: any[]) => {} } as never;
 
-const i2c = new I2C({ address: 0, busNumber: 1 });
+const stepperX = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
+const stepperY = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
+const stepperZ = new Stepper({ dirPin: gpioMock, enaPin: gpioMock, pulPin: gpioMock, maxSpeed: 1000 });
+
+const i2cBusMock = { readWordSync: (..._args: any[]) => 0 } as never;
+
+const i2c = new I2C({ address: 0, bus: i2cBusMock });
 
 const sensorXA = new Sensor({ i2c, port: 0 });
 const sensorXB = new Sensor({ i2c, port: 1 });
@@ -23,8 +27,9 @@ const sensorZB = new Sensor({ i2c, port: 5 });
 const broker = new Broker();
 
 const service = new Service({
-    sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
+    i2c,
     broker,
+    sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
     steppers: [stepperX, stepperY, stepperZ],
 });
 
