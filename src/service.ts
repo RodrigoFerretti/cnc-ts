@@ -92,8 +92,13 @@ export class Service {
             Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
         );
 
-        const time = Math.ceil(distanceMagnitude / speedMagnitude) * 1000;
-        const speed: Vector<3> = [distance[0] / time, distance[1] / time, distance[2] / time];
+        const time = Math.ceil(distanceMagnitude / speedMagnitude);
+
+        const speed: Vector<3> = [
+            Math.abs(distance[0] / time),
+            Math.abs(distance[1] / time),
+            Math.abs(distance[2] / time),
+        ];
 
         this.moves = [
             new LinearMove({

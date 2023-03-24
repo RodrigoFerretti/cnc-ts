@@ -54,6 +54,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/nanotimer@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@types/nanotimer/-/nanotimer-0.3.0.tgz#8db511a7ddcac749afd28d312fb275801b5ed51d"
+  integrity sha512-D1EtCce8B5vyb/47+xOpBkv4NRvFwSIVBFjbc38RNTsk2GPYYKwWQP7fPp+2AnbM7+W01TCUAmJGLRzfITjuuA==
+
 "@types/node@*":
   version "18.15.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.15.0.tgz#286a65e3fdffd691e170541e6ecb0410b16a38be"
@@ -322,6 +327,11 @@ nan@^2.14.2:
   version "2.17.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.17.0.tgz#c0150a2368a182f033e9aa5195ec76ea41a199cb"
   integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
+
+nanotimer@0.3.15:
+  version "0.3.15"
+  resolved "https://registry.yarnpkg.com/nanotimer/-/nanotimer-0.3.15.tgz#280d277db9146eca6f8a570b572abaf2a9acc754"
+  integrity sha512-xj8HcwceqeRbfSuwNIzYhdbyZu3zoiHX3y2cyVB/cLn0RzVCI8ZZVQLZELEUMG2tYEsjqbCLb3b4q1lDC7ENnA==
 
 normalize-path@^3.0.0, normalize-path@~3.0.0:
   version "3.0.0"
