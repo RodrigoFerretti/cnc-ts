@@ -19,7 +19,7 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.NotStarted) {
-            this.stepper.move({ position: -100_000, speed: this.stepper.getMaxSpeed() });
+            this.stepper.move({ position: -Infinity, speed: this.stepper.getMaxSpeed() });
             this.stage = Home.Stage.AInProcess;
         }
 

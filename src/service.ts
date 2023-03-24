@@ -227,7 +227,7 @@ export class Service {
         ];
 
         if (this.status !== Service.Status.Idle) {
-            console.log(`x:${currentPosition[0]} y:${currentPosition[1]} z:${currentPosition[2]}`);
+            console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
         }
 
         this.loopStatus = Service.LoopStatus.Clear;
