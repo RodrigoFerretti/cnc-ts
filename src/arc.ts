@@ -67,6 +67,10 @@ export class Arc {
             position: pointPosition,
         };
     };
+
+    public getFinalPosition = () => {
+        return this.finalPosition;
+    };
 }
 
 export namespace Arc {

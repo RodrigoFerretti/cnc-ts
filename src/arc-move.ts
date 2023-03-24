@@ -28,12 +28,12 @@ export class ArcMove extends Move {
             return;
         }
 
-        if (this.currentPointIndex === this.arc.getPointsLenght()) {
-            this.status = Move.Status.Completed;
+        if (this.stepper.isMoving()) {
             return;
         }
 
-        if (this.stepper.isMoving()) {
+        if (this.currentPointIndex === this.arc.getPointsLenght() + 1) {
+            this.status = Move.Status.Completed;
             return;
         }
 

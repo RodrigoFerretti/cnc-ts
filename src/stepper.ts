@@ -24,7 +24,7 @@ export class Stepper {
 
     public move = async (options: Stepper.MoveOptions) => {
         const speed = options.speed;
-        const targetPosition = options.position;
+        const targetPosition = Math.round(options.position);
         const distance = targetPosition - this.currentPosition;
         const steps = Math.abs(distance);
         const time = steps / speed;
@@ -33,8 +33,12 @@ export class Stepper {
         const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
         const positionIncrement = direction === Stepper.Direction.Forwards ? 1 : -1;
 
+        if (steps < 1 || speed < 0.01) {
+            return;
+        }
+
         let pulse: Stepper.Pulse = Stepper.Pulse.On;
-        let remainingPulses = pulses;
+        let remainingPulses = Math.ceil(pulses);
 
         this.isStepping = true;
 
