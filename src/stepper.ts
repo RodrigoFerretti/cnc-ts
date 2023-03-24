@@ -5,8 +5,8 @@ export class Stepper {
     private maxSpeed: number;
     private pulsePin: Gpio;
     private nanoTimer: NanoTimer;
-    private _isMoving: boolean;
     private enablePin: Gpio;
+    private isStepping: boolean;
     private directionPin: Gpio;
     private currentPosition: number;
 
@@ -14,7 +14,7 @@ export class Stepper {
         this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
         this.nanoTimer = new NanoTimer();
-        this._isMoving = false;
+        this.isStepping = false;
         this.enablePin = options.enablePin;
         this.directionPin = options.directionPin;
         this.currentPosition = 0;
@@ -36,7 +36,7 @@ export class Stepper {
         let pulse: Stepper.Pulse = Stepper.Pulse.On;
         let remainingPulses = pulses;
 
-        this._isMoving = true;
+        this.isStepping = true;
 
         await this.enablePin.write(Stepper.Enable.On);
         await this.directionPin.write(direction);
@@ -65,9 +65,9 @@ export class Stepper {
     };
 
     public stop = async () => {
-        await this.enablePin.write(Stepper.Enable.Off);
-        this._isMoving = false;
+        this.isStepping = false;
         this.nanoTimer.clearInterval();
+        await this.enablePin.write(Stepper.Enable.Off);
     };
 
     public setPosition = (options: Stepper.SetPositionOptions) => {
@@ -79,7 +79,7 @@ export class Stepper {
     };
 
     public isMoving = (): boolean => {
-        return this._isMoving;
+        return this.isStepping;
     };
 }
 
