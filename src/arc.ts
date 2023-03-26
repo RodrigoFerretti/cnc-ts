@@ -40,7 +40,7 @@ export class Arc {
         this.segmentAngle = this.angle / this.pointsLength;
     }
 
-    public getPointsLenght = () => {
+    public getPointsLength = () => {
         return this.pointsLength;
     };
 
@@ -68,8 +68,8 @@ export class Arc {
         };
     };
 
-    public getFinalPosition = () => {
-        return this.finalPosition;
+    public getLength = () => {
+        return Math.abs(this.radius * this.angle);
     };
 }
 

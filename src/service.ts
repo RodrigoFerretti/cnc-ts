@@ -11,6 +11,9 @@ import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
 import { Vector } from "./vector";
 
+let startTime: number;
+let expectedTime: number;
+
 export class Service {
     private i2c: I2C;
     private moves: Move[];
@@ -29,10 +32,7 @@ export class Service {
         this.steppers = options.steppers;
         this.loopStatus = Service.LoopStatus.Clear;
 
-        setInterval(() => {
-            if (this.loopStatus === Service.LoopStatus.Running) return;
-            this.loop();
-        });
+        setInterval(this.loop);
     }
 
     public getStatus = () => {
@@ -157,6 +157,10 @@ export class Service {
         });
 
         const speedMagnitude = gCode.f !== undefined ? gCode.f : 200;
+        const time = arc.getLength() / speedMagnitude;
+
+        startTime = performance.now();
+        expectedTime = time;
 
         this.moves = [
             new ArcMove({
@@ -196,6 +200,8 @@ export class Service {
     public resume = () => {};
 
     private loop = () => {
+        if (this.loopStatus === Service.LoopStatus.Running) return;
+
         this.loopStatus = Service.LoopStatus.Running;
 
         this.i2c.read();
@@ -209,6 +215,8 @@ export class Service {
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
             this.status = Service.Status.Idle;
             this.moves = [];
+
+            console.log(`expected time: ${expectedTime * 1e3} real time: ${performance.now() - startTime}`);
 
             this.broker.emit("message", this.status);
         }
