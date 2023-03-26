@@ -7,7 +7,7 @@ import { Server } from "./server";
 import { Service } from "./service";
 import { Stepper } from "./stepper";
 
-const gpioMock = { write: async (..._args: any[]) => {}, writeSync: (..._args: any[]) => {} } as never;
+const gpioMock = { writeSync: (..._args: any[]) => {} } as never;
 
 const stepperX = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock, maxSpeed: 15000 });
 const stepperY = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock, maxSpeed: 15000 });

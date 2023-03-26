@@ -1,3 +1,4 @@
+import NanoTimer from "nanotimer";
 import { Arc } from "./arc";
 import { ArcMove } from "./arc-move";
 import { Broker } from "./broker";
@@ -32,7 +33,7 @@ export class Service {
         this.steppers = options.steppers;
         this.loopStatus = Service.LoopStatus.Clear;
 
-        setInterval(this.loop);
+        new NanoTimer().setInterval(this.loop, "", "1u");
     }
 
     public getStatus = () => {
@@ -228,15 +229,15 @@ export class Service {
             this.broker.emit("message", this.status);
         }
 
-        const currentPosition: Vector<3> = [
-            this.steppers[0].getPosition(),
-            this.steppers[1].getPosition(),
-            this.steppers[2].getPosition(),
-        ];
+        // const currentPosition: Vector<3> = [
+        //     this.steppers[0].getPosition(),
+        //     this.steppers[1].getPosition(),
+        //     this.steppers[2].getPosition(),
+        // ];
 
-        if (this.status !== Service.Status.Idle) {
-            console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
-        }
+        // if (this.status !== Service.Status.Idle) {
+        //     console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
+        // }
 
         this.loopStatus = Service.LoopStatus.Clear;
     };
