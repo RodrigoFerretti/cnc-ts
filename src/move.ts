@@ -10,8 +10,7 @@ export abstract class Move {
     protected nanoTimer: NanoTimer;
 
     public constructor(options: Move.Options) {
-        const maxSpeed = options.stepper.getMaxSpeed();
-        this.speed = maxSpeed > options.speed! ? options.speed! : maxSpeed;
+        this.speed = options.speed;
         this.status = Move.Status.Moving;
         this.stepper = options.stepper;
         this.sensors = options.sensors;
@@ -21,19 +20,11 @@ export abstract class Move {
     public getStatus = () => {
         return this.status;
     };
-
-    public getSensorsReadings = () => {
-        return this.sensors.reduce<boolean>((reading, sensor) => {
-            return sensor.getReading() || reading;
-        }, false);
-    };
-
-    protected abstract loop: () => void;
 }
 
 export namespace Move {
     export type Options = {
-        speed?: number;
+        speed: number;
         stepper: Stepper;
         sensors: [Sensor, Sensor];
     };

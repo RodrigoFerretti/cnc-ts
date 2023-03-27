@@ -3,7 +3,7 @@ import { Broker } from "./broker";
 import { Router } from "./router";
 
 export class Server extends WebSocketServer {
-    constructor(options: Server.Options) {
+    public constructor(options: Server.Options) {
         const router = options.router;
         const broker = options.broker;
 

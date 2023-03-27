@@ -8,10 +8,10 @@ export class Broker {
     }
 
     public on = (eventName: "message", listener: (message: string) => void) => {
-        return this.eventEmitter.on(eventName, listener);
+        this.eventEmitter.on(eventName, listener);
     };
 
     public emit = (eventName: "message", message: string) => {
-        return this.eventEmitter.emit(eventName, message);
+        this.eventEmitter.emit(eventName, message);
     };
 }

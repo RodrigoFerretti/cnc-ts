@@ -1,24 +1,25 @@
 import NanoTimer from "nanotimer";
 import { Gpio } from "onoff";
+import { EventEmitter } from "stream";
 
 export class Stepper {
     private pulse: Stepper.Pulse;
-    private maxSpeed: number;
     private pulsePin: Gpio;
     private nanoTimer: NanoTimer;
     private enablePin: Gpio;
     private isStepping: boolean;
+    private eventEmitter: EventEmitter;
     private directionPin: Gpio;
     private currentPosition: number;
     private remainingPulses: number;
 
     constructor(options: Stepper.Options) {
         this.pulse = Stepper.Pulse.Off;
-        this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
         this.nanoTimer = new NanoTimer();
         this.isStepping = false;
         this.enablePin = options.enablePin;
+        this.eventEmitter = new EventEmitter();
         this.directionPin = options.directionPin;
         this.currentPosition = 0;
         this.remainingPulses = 0;
@@ -34,7 +35,8 @@ export class Stepper {
         const pulseDelay = (steps / options.speed / pulses) * 1e6;
         const positionIncrement = direction === Stepper.Direction.Forwards ? 1 : -1;
 
-        if (distance === 0 || pulseDelay > 1e6) {
+        if (distance === 0) {
+            this.emit("move-completed");
             return;
         }
 
@@ -50,6 +52,7 @@ export class Stepper {
             this.nanoTimer.setInterval(
                 async () => {
                     if (this.remainingPulses === 0) {
+                        this.emit("move-completed");
                         return resolve(this.stop());
                     }
 
@@ -82,16 +85,20 @@ export class Stepper {
         this.currentPosition = options.position;
     };
 
-    public getMaxSpeed = () => {
-        return this.maxSpeed;
-    };
-
     public isMoving = (): boolean => {
         return this.isStepping;
     };
 
     private changePulse = () => {
         this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
+    };
+
+    public on = (eventName: "move-completed", listener: () => void) => {
+        this.eventEmitter.on(eventName, listener);
+    };
+
+    private emit = (eventName: "move-completed") => {
+        this.eventEmitter.emit(eventName);
     };
 }
 
@@ -112,7 +119,6 @@ export namespace Stepper {
     }
 
     export type Options = {
-        maxSpeed: number;
         pulsePin: Gpio;
         enablePin: Gpio;
         directionPin: Gpio;

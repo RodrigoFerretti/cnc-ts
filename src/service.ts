@@ -4,7 +4,6 @@ import { Broker } from "./broker";
 import { Coordinate } from "./coodinate";
 import { GCode } from "./gcode";
 import { Home } from "./home";
-import { I2C } from "./i2c";
 import { LinearMove } from "./linear-move";
 import { Move } from "./move";
 import { Sensor } from "./sensor";
@@ -12,7 +11,6 @@ import { Stepper } from "./stepper";
 import { Vector } from "./vector";
 
 export class Service {
-    private i2c: I2C;
     private moves: Move[];
     private status: Service.Status;
     private broker: Broker;
@@ -21,7 +19,6 @@ export class Service {
     private loopStatus: Service.LoopStatus;
 
     constructor(options: Service.Options) {
-        this.i2c = options.i2c;
         this.moves = [];
         this.status = Service.Status.Idle;
         this.broker = options.broker;
@@ -84,12 +81,12 @@ export class Service {
             finalPosition[2] - currentPosition[2],
         ];
 
-        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 200;
+        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 15000;
         const distanceMagnitude = Math.sqrt(
             Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
         );
 
-        const time = Math.ceil(distanceMagnitude / speedMagnitude);
+        const time = distanceMagnitude / speedMagnitude;
 
         const speed: Vector<3> = [
             Math.abs(distance[0] / time),
@@ -147,13 +144,14 @@ export class Service {
         const applicate = gCode.i === undefined ? 0 : gCode.j === undefined ? 1 : 2;
 
         const arc = new Arc({
+            tolerance: 0.01,
             isClockWise: gCode.g === "02",
             finalPosition: [finalPosition[abscissa], finalPosition[ordinate]],
             centerPosition: [centerPosition[abscissa], centerPosition[ordinate]],
             initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
         });
 
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : 200;
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : 15000;
         const time = arc.getLength() / speedMagnitude;
         const applicateSpeed = (finalPosition[applicate] - currentPosition[applicate]) / time;
 
@@ -199,20 +197,18 @@ export class Service {
 
         this.loopStatus = Service.LoopStatus.Running;
 
-        this.i2c.read();
-
         const movesStatus = this.moves.map((move) => move.getStatus());
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
-            this.status = Service.Status.Idle;
             this.moves = [];
+            this.status = Service.Status.Idle;
 
             this.broker.emit("message", this.status);
         }
 
         if (movesStatus.some((movesStatus) => movesStatus === Move.Status.SensorStopped)) {
-            this.status = Service.Status.SensorStopped;
             this.moves = [];
+            this.status = Service.Status.SensorStopped;
 
             this.broker.emit("message", this.status);
         }
@@ -248,7 +244,6 @@ export namespace Service {
     }
 
     export type Options = {
-        i2c: I2C;
         broker: Broker;
         sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
         steppers: [Stepper, Stepper, Stepper];

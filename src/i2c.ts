@@ -1,24 +1,31 @@
 import { I2CBus } from "i2c-bus";
+import { EventEmitter } from "stream";
 
 export class I2C {
     private bus: I2CBus;
-    private reading: number;
     private address: number;
     private command: number;
+    private eventEmitter: EventEmitter;
 
     constructor(options: I2C.Options) {
         this.bus = options.bus;
-        this.reading = 0;
         this.address = options.address;
         this.command = 0;
+        this.eventEmitter = new EventEmitter();
+
+        setInterval(this.loop);
     }
 
-    public read = () => {
-        this.reading = this.bus.readWordSync(this.address, this.command);
+    private loop = () => {
+        this.emit("reading", this.bus.readWordSync(this.address, this.command));
     };
 
-    public getReading = () => {
-        return this.reading;
+    private emit = (eventName: "reading", reading: number) => {
+        this.eventEmitter.emit(eventName, reading);
+    };
+
+    public on = (eventName: "reading", listener: (reading: number) => void) => {
+        this.eventEmitter.on(eventName, listener);
     };
 }
 

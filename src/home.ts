@@ -9,25 +9,41 @@ export class Home extends Move {
     public constructor(options: Home.Options) {
         super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
-        this.stage = this.sensors[0].getReading() === true ? Home.Stage.ACompleted : Home.Stage.NotStarted;
-        this.nanoTimer.setInterval(this.loop, "", "1u");
+        this.stage = Home.Stage.NotStarted;
         this.retractPosition = options.retractPosition;
+
+        this.sensors[0].on("hit", this.onSensorHit);
+        this.stepper.on("move-completed", this.onStepperMoveCompleted);
+
+        this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
-    protected loop = () => {
-        if (this.stage === Home.Stage.NotStarted) {
-            this.stepper.move({ position: -Infinity, speed: this.stepper.getMaxSpeed() });
-            this.stage = Home.Stage.AInProcess;
-        }
-
+    private onSensorHit = () => {
         if (this.stage === Home.Stage.AInProcess) {
-            if (this.sensors[0].getReading() === false) {
-                return;
-            }
-
             this.stepper.stop();
             this.stepper.setPosition({ position: 0 });
             this.stage = Home.Stage.ACompleted;
+        }
+
+        if (this.stage === Home.Stage.CInProcess) {
+            this.stepper.stop();
+            this.stepper.setPosition({ position: 0 });
+            this.stage = Home.Stage.CCompleted;
+            this.status = Move.Status.Completed;
+            this.nanoTimer.clearInterval();
+        }
+    };
+
+    private onStepperMoveCompleted = () => {
+        if (this.stage === Home.Stage.BInProcess) {
+            this.stage = Home.Stage.BCompleted;
+        }
+    };
+
+    protected loop = () => {
+        if (this.stage === Home.Stage.NotStarted) {
+            this.stepper.move({ position: -Infinity, speed: 15000 });
+            this.stage = Home.Stage.AInProcess;
         }
 
         if (this.stage === Home.Stage.ACompleted) {
@@ -35,29 +51,9 @@ export class Home extends Move {
             this.stage = Home.Stage.BInProcess;
         }
 
-        if (this.stage === Home.Stage.BInProcess) {
-            if (this.stepper.isMoving()) {
-                return;
-            }
-
-            this.stage = Home.Stage.BCompleted;
-        }
-
         if (this.stage === Home.Stage.BCompleted) {
-            this.stepper.move({ position: -(this.retractPosition * 2), speed: this.speed });
+            this.stepper.move({ position: -Infinity, speed: this.speed });
             this.stage = Home.Stage.CInProcess;
-        }
-
-        if (this.stage === Home.Stage.CInProcess) {
-            if (this.sensors[0].getReading() === false) {
-                return;
-            }
-
-            this.stepper.stop();
-            this.stepper.setPosition({ position: 0 });
-            this.stage = Home.Stage.CCompleted;
-            this.status = Move.Status.Completed;
-            this.nanoTimer.clearInterval();
         }
     };
 }
