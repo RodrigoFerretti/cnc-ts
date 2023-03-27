@@ -12,7 +12,7 @@ export class Arc {
     private initialPosition: Vector<2>;
 
     public constructor(options: Arc.Options) {
-        this.tolerance = options.arcTolerance || 0.01;
+        this.tolerance = options.arcTolerance || 5;
         this.isClockWise = options.isClockWise;
         this.finalPosition = options.finalPosition;
         this.centerPosition = options.centerPosition;

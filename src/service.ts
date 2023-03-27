@@ -159,6 +159,7 @@ export class Service {
 
         const speedMagnitude = gCode.f !== undefined ? gCode.f : 200;
         const time = arc.getLength() / speedMagnitude;
+        const applicateSpeed = (finalPosition[applicate] - currentPosition[applicate]) / time;
 
         startTime = performance.now();
         expectedTime = time;
@@ -181,7 +182,7 @@ export class Service {
             }),
 
             new LinearMove({
-                speed: speedMagnitude,
+                speed: applicateSpeed,
                 stepper: this.steppers[applicate],
                 sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
                 position: finalPosition[applicate],

@@ -33,7 +33,7 @@ export class Stepper {
         const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
         const positionIncrement = direction === Stepper.Direction.Forwards ? 1 : -1;
 
-        if (distance === 0) {
+        if (distance === 0 || pulseDelay > 1e6) {
             return;
         }
 
