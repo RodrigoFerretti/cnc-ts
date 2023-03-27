@@ -152,7 +152,7 @@ export class Service {
         });
 
         const speedMagnitude = gCode.f !== undefined ? gCode.f : 15000;
-        const time = arc.getLength() / speedMagnitude;
+        const time = arc.getPerimeter() / speedMagnitude;
         const applicateSpeed = (finalPosition[applicate] - currentPosition[applicate]) / time;
 
         this.moves = [

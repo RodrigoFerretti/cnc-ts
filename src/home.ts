@@ -40,7 +40,7 @@ export class Home extends Move {
         }
     };
 
-    protected loop = () => {
+    private loop = () => {
         if (this.stage === Home.Stage.NotStarted) {
             this.stepper.move({ position: -Infinity, speed: 15000 });
             this.stage = Home.Stage.AInProcess;

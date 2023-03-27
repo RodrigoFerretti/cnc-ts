@@ -24,7 +24,7 @@ export class ArcMove extends Move {
         this.sensors[1].on("hit", this.onSensorHit);
         this.eventEmitter.on("final-position", this.onFinalPosition);
 
-        this.pointTime = this.arc.getLength() / this.speed / this.arc.getPointsLength();
+        this.pointTime = this.arc.getPerimeter() / this.speed / this.arc.getPointsLength();
         this.nanoTimer.setInterval(this.loop, "", `${this.pointTime * 1e6}u`);
     }
 

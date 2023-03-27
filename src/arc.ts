@@ -62,7 +62,7 @@ export class Arc {
         return position;
     };
 
-    public getLength = () => {
+    public getPerimeter = () => {
         return Math.abs(this.radius * this.angle);
     };
 }
