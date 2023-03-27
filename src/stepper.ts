@@ -2,6 +2,7 @@ import NanoTimer from "nanotimer";
 import { Gpio } from "onoff";
 
 export class Stepper {
+    private pulse: Stepper.Pulse;
     private maxSpeed: number;
     private pulsePin: Gpio;
     private nanoTimer: NanoTimer;
@@ -9,8 +10,10 @@ export class Stepper {
     private isStepping: boolean;
     private directionPin: Gpio;
     private currentPosition: number;
+    private remainingPulses: number;
 
     constructor(options: Stepper.Options) {
+        this.pulse = Stepper.Pulse.Off;
         this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
         this.nanoTimer = new NanoTimer();
@@ -18,13 +21,14 @@ export class Stepper {
         this.enablePin = options.enablePin;
         this.directionPin = options.directionPin;
         this.currentPosition = 0;
+        this.remainingPulses = 0;
 
         this.enablePin.writeSync(Stepper.Enable.Off);
     }
 
     public move = (options: Stepper.MoveOptions) => {
         const speed = options.speed;
-        const targetPosition = Math.round(options.position);
+        const targetPosition = options.position;
         const distance = targetPosition - this.currentPosition;
         const steps = Math.abs(distance);
         const time = steps / speed;
@@ -37,25 +41,29 @@ export class Stepper {
             return;
         }
 
-        let pulse: Stepper.Pulse = Stepper.Pulse.On;
-        let remainingPulses = pulses;
-
+        this.pulse = Stepper.Pulse.On;
         this.isStepping = true;
+        this.remainingPulses = pulses;
 
         this.enablePin.writeSync(Stepper.Enable.On);
         this.directionPin.writeSync(direction);
 
         return new Promise<void>(async (resolve) => {
+            this.nanoTimer.clearInterval();
             this.nanoTimer.setInterval(
                 async () => {
-                    if (remainingPulses === 0) {
+                    if (this.remainingPulses === 0) {
                         return resolve(this.stop());
                     }
 
-                    this.pulsePin.writeSync(pulse);
-                    pulse = pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
-                    this.currentPosition = this.currentPosition + (pulse === Stepper.Pulse.On ? positionIncrement : 0);
-                    remainingPulses--;
+                    this.pulsePin.writeSync(this.pulse);
+                    this.changePulse();
+
+                    this.remainingPulses--;
+                    this.currentPosition =
+                        this.pulse === Stepper.Pulse.On
+                            ? this.currentPosition + positionIncrement
+                            : this.currentPosition;
                 },
                 "",
                 `${pulseDelay}u`
@@ -83,6 +91,10 @@ export class Stepper {
 
     public isMoving = (): boolean => {
         return this.isStepping;
+    };
+
+    private changePulse = () => {
+        this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
     };
 }
 

@@ -7,21 +7,20 @@ export class LinearMove extends Move {
         super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
         this.stepper.move({ position: options.position, speed: this.speed });
+        this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
-    public loop = () => {
+    protected loop = () => {
         if (this.getSensorsReadings()) {
             this.stepper.stop();
             this.status = Move.Status.SensorStopped;
-            return;
-        }
-
-        if (this.status !== Move.Status.Moving) {
+            this.nanoTimer.clearInterval();
             return;
         }
 
         if (!this.stepper.isMoving()) {
             this.status = Move.Status.Completed;
+            this.nanoTimer.clearInterval();
             return;
         }
     };

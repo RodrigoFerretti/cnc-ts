@@ -12,7 +12,7 @@ export class Arc {
     private initialPosition: Vector<2>;
 
     public constructor(options: Arc.Options) {
-        this.tolerance = options.arcTolerance || 5;
+        this.tolerance = options.arcTolerance || 0.01;
         this.isClockWise = options.isClockWise;
         this.finalPosition = options.finalPosition;
         this.centerPosition = options.centerPosition;
@@ -44,14 +44,13 @@ export class Arc {
         return this.pointsLength;
     };
 
-    public getPoint = (options: Arc.GetPointOptions): Arc.Point => {
+    public getPointPosition = (options: Arc.GetPointPositionOptions) => {
         const index = options.index;
-        const speed = options.speed;
 
         const segmentCos = Math.cos(index * this.segmentAngle);
         const segmentSin = Math.sin(index * this.segmentAngle);
 
-        const pointPosition: Vector<2> = [
+        const position: Vector<2> = [
             this.centerPosition[0] +
                 ((this.initialPosition[0] - this.centerPosition[0]) * segmentCos -
                     (this.initialPosition[1] - this.centerPosition[1]) * segmentSin),
@@ -60,12 +59,7 @@ export class Arc {
                     (this.initialPosition[1] - this.centerPosition[1]) * segmentCos),
         ];
 
-        const pointSpeed: Vector<2> = [Math.abs(segmentSin) * speed, Math.abs(segmentCos) * speed];
-
-        return {
-            speed: pointSpeed,
-            position: pointPosition,
-        };
+        return position;
     };
 
     public getLength = () => {
@@ -82,13 +76,7 @@ export namespace Arc {
         initialPosition: Vector<2>;
     };
 
-    export type Point = {
-        speed: Vector<2>;
-        position: Vector<2>;
-    };
-
-    export type GetPointOptions = {
+    export type GetPointPositionOptions = {
         index: number;
-        speed: number;
     };
 }

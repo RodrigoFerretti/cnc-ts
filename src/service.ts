@@ -1,4 +1,3 @@
-import NanoTimer from "nanotimer";
 import { Arc } from "./arc";
 import { ArcMove } from "./arc-move";
 import { Broker } from "./broker";
@@ -33,7 +32,7 @@ export class Service {
         this.steppers = options.steppers;
         this.loopStatus = Service.LoopStatus.Clear;
 
-        new NanoTimer().setInterval(this.loop, "", "1u");
+        setInterval(this.loop);
     }
 
     public getStatus = () => {
@@ -100,6 +99,9 @@ export class Service {
             Math.abs(distance[1] / time),
             Math.abs(distance[2] / time),
         ];
+
+        startTime = performance.now();
+        expectedTime = time;
 
         this.moves = [
             new LinearMove({
@@ -208,10 +210,6 @@ export class Service {
 
         this.i2c.read();
 
-        this.moves.reduce<void>((_, move) => {
-            move.loop();
-        }, undefined);
-
         const movesStatus = this.moves.map((move) => move.getStatus());
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
@@ -230,15 +228,15 @@ export class Service {
             this.broker.emit("message", this.status);
         }
 
-        // const currentPosition: Vector<3> = [
-        //     this.steppers[0].getPosition(),
-        //     this.steppers[1].getPosition(),
-        //     this.steppers[2].getPosition(),
-        // ];
+        const currentPosition: Vector<3> = [
+            this.steppers[0].getPosition(),
+            this.steppers[1].getPosition(),
+            this.steppers[2].getPosition(),
+        ];
 
-        // if (this.status !== Service.Status.Idle) {
-        //     console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
-        // }
+        if (this.status !== Service.Status.Idle) {
+            console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
+        }
 
         this.loopStatus = Service.LoopStatus.Clear;
     };

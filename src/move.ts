@@ -1,3 +1,4 @@
+import NanoTimer from "nanotimer";
 import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
 
@@ -6,6 +7,7 @@ export abstract class Move {
     protected status: Move.Status;
     protected stepper: Stepper;
     protected sensors: [Sensor, Sensor];
+    protected nanoTimer: NanoTimer;
 
     public constructor(options: Move.Options) {
         const maxSpeed = options.stepper.getMaxSpeed();
@@ -13,6 +15,7 @@ export abstract class Move {
         this.status = Move.Status.Moving;
         this.stepper = options.stepper;
         this.sensors = options.sensors;
+        this.nanoTimer = new NanoTimer();
     }
 
     public getStatus = () => {
@@ -25,7 +28,7 @@ export abstract class Move {
         }, false);
     };
 
-    public abstract loop: () => void;
+    protected abstract loop: () => void;
 }
 
 export namespace Move {

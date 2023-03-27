@@ -10,10 +10,11 @@ export class Home extends Move {
         super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
 
         this.stage = this.sensors[0].getReading() === true ? Home.Stage.ACompleted : Home.Stage.NotStarted;
+        this.nanoTimer.setInterval(this.loop, "", "1u");
         this.retractPosition = options.retractPosition;
     }
 
-    public loop = () => {
+    protected loop = () => {
         if (this.status === Move.Status.Completed) {
             return;
         }
@@ -54,6 +55,7 @@ export class Home extends Move {
             this.stepper.setPosition({ position: 0 });
             this.stage = Home.Stage.CCompleted;
             this.status = Move.Status.Completed;
+            this.nanoTimer.clearInterval();
         }
     };
 }

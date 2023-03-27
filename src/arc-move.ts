@@ -1,11 +1,12 @@
-import { Move } from "./move";
 import { Arc } from "./arc";
 import { Coordinate } from "./coodinate";
+import { Move } from "./move";
 import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
 
 export class ArcMove extends Move {
     private arc: Arc;
+    private pointTime: number;
     private coordinate: Coordinate.Abscissa | Coordinate.Ordinate;
     private currentPointIndex: number;
 
@@ -15,30 +16,34 @@ export class ArcMove extends Move {
         this.arc = options.arc;
         this.coordinate = options.coordinate;
         this.currentPointIndex = 0;
+
+        const time = this.arc.getLength() / this.speed;
+        const pointsLength = this.arc.getPointsLength();
+
+        this.pointTime = time / pointsLength;
+        this.nanoTimer.setInterval(this.loop, "", `${this.pointTime * 1e6}u`);
     }
 
-    public loop = () => {
+    protected loop = () => {
         if (this.getSensorsReadings()) {
-            this.stepper.stop();
             this.status = Move.Status.SensorStopped;
-            return;
-        }
-
-        if (this.status !== Move.Status.Moving) {
-            return;
-        }
-
-        if (this.stepper.isMoving()) {
+            this.nanoTimer.clearInterval();
+            this.stepper.stop();
             return;
         }
 
         if (this.currentPointIndex === this.arc.getPointsLength() + 1) {
             this.status = Move.Status.Completed;
+            this.nanoTimer.clearInterval();
             return;
         }
 
-        const point = this.arc.getPoint({ index: this.currentPointIndex, speed: this.speed });
-        this.stepper.move({ position: point.position[this.coordinate], speed: point.speed[this.coordinate] });
+        const pointPosition = this.arc.getPointPosition({ index: this.currentPointIndex });
+        const coordinatePosition = Math.round(pointPosition[this.coordinate]);
+        const distance = coordinatePosition - this.stepper.getPosition();
+        const speed = Math.abs(distance) / this.pointTime;
+
+        this.stepper.move({ position: coordinatePosition, speed });
         this.currentPointIndex++;
     };
 }
