@@ -15,17 +15,15 @@ export class Home extends Move {
     }
 
     protected loop = () => {
-        if (this.status === Move.Status.Completed) {
-            return;
-        }
-
         if (this.stage === Home.Stage.NotStarted) {
             this.stepper.move({ position: -Infinity, speed: this.stepper.getMaxSpeed() });
             this.stage = Home.Stage.AInProcess;
         }
 
         if (this.stage === Home.Stage.AInProcess) {
-            if (this.sensors[0].getReading() === false) return;
+            if (this.sensors[0].getReading() === false) {
+                return;
+            }
 
             this.stepper.stop();
             this.stepper.setPosition({ position: 0 });
@@ -38,7 +36,9 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.BInProcess) {
-            if (this.stepper.isMoving()) return;
+            if (this.stepper.isMoving()) {
+                return;
+            }
 
             this.stage = Home.Stage.BCompleted;
         }
@@ -49,7 +49,9 @@ export class Home extends Move {
         }
 
         if (this.stage === Home.Stage.CInProcess) {
-            if (this.sensors[0].getReading() === false) return;
+            if (this.sensors[0].getReading() === false) {
+                return;
+            }
 
             this.stepper.stop();
             this.stepper.setPosition({ position: 0 });

@@ -15,12 +15,14 @@ export class LinearMove extends Move {
             this.stepper.stop();
             this.status = Move.Status.SensorStopped;
             this.nanoTimer.clearInterval();
+
             return;
         }
 
         if (!this.stepper.isMoving()) {
             this.status = Move.Status.Completed;
             this.nanoTimer.clearInterval();
+
             return;
         }
     };

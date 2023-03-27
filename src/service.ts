@@ -11,9 +11,6 @@ import { Sensor } from "./sensor";
 import { Stepper } from "./stepper";
 import { Vector } from "./vector";
 
-let startTime: number;
-let expectedTime: number;
-
 export class Service {
     private i2c: I2C;
     private moves: Move[];
@@ -100,9 +97,6 @@ export class Service {
             Math.abs(distance[2] / time),
         ];
 
-        startTime = performance.now();
-        expectedTime = time;
-
         this.moves = [
             new LinearMove({
                 speed: speed[0],
@@ -163,9 +157,6 @@ export class Service {
         const time = arc.getLength() / speedMagnitude;
         const applicateSpeed = (finalPosition[applicate] - currentPosition[applicate]) / time;
 
-        startTime = performance.now();
-        expectedTime = time;
-
         this.moves = [
             new ArcMove({
                 arc,
@@ -215,8 +206,6 @@ export class Service {
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
             this.status = Service.Status.Idle;
             this.moves = [];
-
-            console.log(`expected time: ${expectedTime * 1e3} real time: ${performance.now() - startTime}`);
 
             this.broker.emit("message", this.status);
         }

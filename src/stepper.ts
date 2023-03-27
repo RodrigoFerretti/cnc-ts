@@ -27,26 +27,23 @@ export class Stepper {
     }
 
     public move = (options: Stepper.MoveOptions) => {
-        const speed = options.speed;
-        const targetPosition = options.position;
-        const distance = targetPosition - this.currentPosition;
+        const distance = options.position - this.currentPosition;
         const steps = Math.abs(distance);
-        const time = steps / speed;
         const pulses = steps * 2;
-        const pulseDelay = (time / pulses) * 1e6;
         const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
+        const pulseDelay = (steps / options.speed / pulses) * 1e6;
         const positionIncrement = direction === Stepper.Direction.Forwards ? 1 : -1;
 
         if (distance === 0 || pulseDelay > 1e6) {
             return;
         }
 
+        this.enablePin.writeSync(Stepper.Enable.On);
+        this.directionPin.writeSync(direction);
+
         this.pulse = Stepper.Pulse.On;
         this.isStepping = true;
         this.remainingPulses = pulses;
-
-        this.enablePin.writeSync(Stepper.Enable.On);
-        this.directionPin.writeSync(direction);
 
         return new Promise<void>(async (resolve) => {
             this.nanoTimer.clearInterval();
@@ -76,9 +73,9 @@ export class Stepper {
     };
 
     public stop = async () => {
-        this.isStepping = false;
         this.nanoTimer.clearInterval();
         this.enablePin.writeSync(Stepper.Enable.Off);
+        this.isStepping = false;
     };
 
     public setPosition = (options: Stepper.SetPositionOptions) => {

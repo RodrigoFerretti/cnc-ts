@@ -17,33 +17,32 @@ export class ArcMove extends Move {
         this.coordinate = options.coordinate;
         this.currentPointIndex = 0;
 
-        const time = this.arc.getLength() / this.speed;
-        const pointsLength = this.arc.getPointsLength();
-
-        this.pointTime = time / pointsLength;
+        this.pointTime = this.arc.getLength() / this.speed / this.arc.getPointsLength();
         this.nanoTimer.setInterval(this.loop, "", `${this.pointTime * 1e6}u`);
     }
 
     protected loop = () => {
         if (this.getSensorsReadings()) {
             this.status = Move.Status.SensorStopped;
-            this.nanoTimer.clearInterval();
             this.stepper.stop();
+            this.nanoTimer.clearInterval();
+
             return;
         }
 
         if (this.currentPointIndex === this.arc.getPointsLength() + 1) {
             this.status = Move.Status.Completed;
             this.nanoTimer.clearInterval();
+
             return;
         }
 
         const pointPosition = this.arc.getPointPosition({ index: this.currentPointIndex });
-        const coordinatePosition = Math.round(pointPosition[this.coordinate]);
-        const distance = coordinatePosition - this.stepper.getPosition();
+        const position = Math.round(pointPosition[this.coordinate]);
+        const distance = position - this.stepper.getPosition();
         const speed = Math.abs(distance) / this.pointTime;
 
-        this.stepper.move({ position: coordinatePosition, speed });
+        this.stepper.move({ position: position, speed });
         this.currentPointIndex++;
     };
 }
