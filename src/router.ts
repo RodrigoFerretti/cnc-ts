@@ -1,16 +1,12 @@
+import { Controller } from "./controller";
 import { GCode } from "./gcode";
 import { matchGroups } from "./regex";
-import { Controller } from "./controller";
 
 export class Router {
-    private regex: RegExp;
     private routes: Router.Route[];
     private controller: Controller;
 
     public constructor(options: Router.Options) {
-        this.regex =
-            /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
-
         this.controller = options.controller;
 
         this.routes = [
@@ -25,7 +21,7 @@ export class Router {
     }
 
     public handleMessage = (message: string): string => {
-        const matches = matchGroups({ regex: this.regex, message });
+        const matches = matchGroups({ regex: GCode.regex, message });
 
         const [gCode, error] = GCode.validate({ input: matches });
         if (error !== null) {
@@ -34,7 +30,7 @@ export class Router {
 
         const route = this.routes.find((route) => route.command === ("g" in gCode ? `G${gCode.g}` : `M${gCode.m}`));
         if (route === undefined) {
-            return "not found";
+            return "internal server error";
         }
 
         return route.handle(gCode);

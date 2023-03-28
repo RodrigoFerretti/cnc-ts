@@ -10,7 +10,7 @@ export class I2C {
     constructor(options: I2C.Options) {
         this.bus = options.bus;
         this.address = options.address;
-        this.command = 0;
+        this.command = options.command;
         this.eventEmitter = new EventEmitter();
 
         setInterval(this.loop);
@@ -32,7 +32,8 @@ export class I2C {
 
 export namespace I2C {
     export type Options = {
-        address: number;
         bus: I2CBus;
+        address: number;
+        command: number;
     };
 }

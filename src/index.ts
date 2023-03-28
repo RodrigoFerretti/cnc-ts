@@ -15,7 +15,7 @@ const stepperZ = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, puls
 
 const i2CBusMock = { readWordSync: (..._args: any[]) => 0 } as never;
 
-const i2C = new I2C({ address: 0, bus: i2CBusMock });
+const i2C = new I2C({ address: 0, command: 0, bus: i2CBusMock });
 
 const sensorXA = new Sensor({ i2C, port: 0 });
 const sensorXB = new Sensor({ i2C, port: 1 });

@@ -48,12 +48,16 @@ export class Controller {
         const serviceStatus = this.service.getStatus();
         if (!serviceStatus.endsWith("moving")) return "can only pause when moving";
 
+        this.service.pause();
+
         return this.service.getStatus();
     };
 
     public resume: Controller.Handler<GCode.Resume> = () => {
         const serviceStatus = this.service.getStatus();
         if (serviceStatus !== Service.Status.Paused) return "can only resume when paused";
+
+        this.service.resume();
 
         return this.service.getStatus();
     };

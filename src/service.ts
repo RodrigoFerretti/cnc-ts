@@ -20,6 +20,7 @@ export class Service {
     constructor(options: Service.Options) {
         this.moves = [];
         this.status = Service.Status.Idle;
+        this.resume = this.setResume(this.status);
         this.broker = options.broker;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
@@ -201,7 +202,7 @@ export class Service {
         this.steppers.reduce<void>((_, stepper) => stepper.resume(), undefined);
     };
 
-    public resume = () => {};
+    public resume: () => void;
 
     private loop = () => {
         const movesStatus = this.moves.map((move) => move.getStatus());

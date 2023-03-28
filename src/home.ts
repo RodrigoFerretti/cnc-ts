@@ -63,7 +63,7 @@ export class Home extends Move {
         this.stepper.stop();
         this.stepper.setPosition({ position: 0 });
         this.stage = Home.Stage.CCompleted;
-        return this.finish();
+        this.finish();
     };
 }
 

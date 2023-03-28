@@ -4,6 +4,9 @@ import { Either } from "./either";
 export type GCode = z.infer<typeof GCode.schema>;
 
 export namespace GCode {
+    export const regex =
+        /^G(?<g>\d*\.?\d*)?|M(?<m>\d*\.?\d*)?|X(?<x>\d*\.?\d*)?|Y(?<y>\d*\.?\d*)?|Z(?<z>\d*\.?\d*)?|I(?<i>\d*\.?\d*)?|J(?<j>\d*\.?\d*)?|K(?<k>\d*\.?\d*)?|R(?<r>\d*\.?\d*)?|F(?<f>\d*\.?\d*)?$/gm;
+
     const stringNumber = z.preprocess((string) => (string === undefined ? undefined : Number(string)), z.number());
 
     const refinePosition = ({ x, y, z }: any, ctx: z.RefinementCtx) => {
