@@ -6,19 +6,26 @@ export abstract class Move {
     protected speed: number;
     protected status: Move.Status;
     protected stepper: Stepper;
-    protected sensors: [Sensor, Sensor];
     protected nanoTimer: NanoTimer;
+    protected homeSensor: Sensor;
+    protected limitSensor: Sensor;
 
     public constructor(options: Move.Options) {
         this.speed = options.speed;
-        this.status = Move.Status.Moving;
+        this.status = Move.Status.Started;
         this.stepper = options.stepper;
-        this.sensors = options.sensors;
         this.nanoTimer = new NanoTimer();
+        this.homeSensor = options.homeSensor;
+        this.limitSensor = options.limitSensor;
     }
 
     public getStatus = () => {
         return this.status;
+    };
+
+    protected finish = () => {
+        this.status = Move.Status.Finished;
+        this.nanoTimer.clearInterval();
     };
 }
 
@@ -26,12 +33,12 @@ export namespace Move {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        sensors: [Sensor, Sensor];
+        homeSensor: Sensor;
+        limitSensor: Sensor;
     };
 
     export enum Status {
-        Moving = "moving",
-        Completed = "completed",
-        SensorStopped = "sensor-stopped",
+        Started = "started",
+        Finished = "finished",
     }
 }

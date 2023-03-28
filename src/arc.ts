@@ -4,6 +4,7 @@ export class Arc {
     private angle: number;
     private radius: number;
     private tolerance: number;
+    private perimeter: number;
     private isClockWise: boolean;
     private pointsLength: number;
     private segmentAngle: number;
@@ -33,16 +34,18 @@ export class Arc {
         this.angle = this.isClockWise && this.angle >= 0 ? this.angle - 2 * Math.PI : this.angle;
         this.angle = !this.isClockWise && this.angle <= 0 ? this.angle + 2 * Math.PI : this.angle;
 
+        this.perimeter = Math.abs(this.radius * this.angle);
+
         this.pointsLength = Math.floor(
-            Math.abs(0.5 * this.angle * this.radius) / Math.sqrt(this.tolerance * (2 * this.radius - this.tolerance))
+            Math.abs(0.5 * this.perimeter) / Math.sqrt(this.tolerance * (2 * this.radius - this.tolerance))
         );
 
         this.segmentAngle = this.angle / this.pointsLength;
     }
 
-    public getPointsLength = () => {
-        return this.pointsLength;
-    };
+    public getPerimeter = () => this.perimeter;
+
+    public getPointsLength = () => this.pointsLength;
 
     public getPointPosition = (options: Arc.GetPointPositionOptions) => {
         const index = options.index;
@@ -60,10 +63,6 @@ export class Arc {
         ];
 
         return position;
-    };
-
-    public getPerimeter = () => {
-        return Math.abs(this.radius * this.angle);
     };
 }
 

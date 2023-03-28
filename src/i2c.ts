@@ -17,15 +17,16 @@ export class I2C {
     }
 
     private loop = () => {
-        this.emit("reading", this.bus.readWordSync(this.address, this.command));
+        const readings = this.bus.readWordSync(this.address, this.command).toString(2).split("").reverse();
+        readings.reduce<void>((_, reading, index) => Number(reading) === 1 && this.emit(index), undefined);
     };
 
-    private emit = (eventName: "reading", reading: number) => {
-        this.eventEmitter.emit(eventName, reading);
+    private emit = (port: number) => {
+        this.eventEmitter.emit(String(port));
     };
 
-    public on = (eventName: "reading", listener: (reading: number) => void) => {
-        this.eventEmitter.on(eventName, listener);
+    public on = (port: number, listener: () => void) => {
+        this.eventEmitter.on(String(port), listener);
     };
 }
 

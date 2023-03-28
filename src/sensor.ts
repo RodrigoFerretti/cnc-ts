@@ -11,20 +11,14 @@ export class Sensor {
         this.port = options.port;
         this.eventEmitter = new EventEmitter();
 
-        this.i2C.on("reading", this.onI2CReading);
+        this.i2C.on(this.port, () => this.emit("trigger"));
     }
 
-    private onI2CReading = (reading: number) => {
-        if (Boolean(Number(reading.toString(2).split("").reverse().join("").charAt(this.port)))) {
-            this.emit("hit");
-        }
-    };
-
-    private emit = (eventName: "hit") => {
+    private emit = (eventName: "trigger") => {
         this.eventEmitter.emit(eventName);
     };
 
-    public on = (eventName: "hit", listener: () => void) => {
+    public on = (eventName: "trigger", listener: () => void) => {
         this.eventEmitter.on(eventName, listener);
     };
 }

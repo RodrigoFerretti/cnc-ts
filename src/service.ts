@@ -16,7 +16,6 @@ export class Service {
     private broker: Broker;
     private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
     private steppers: [Stepper, Stepper, Stepper];
-    private loopStatus: Service.LoopStatus;
 
     constructor(options: Service.Options) {
         this.moves = [];
@@ -24,37 +23,40 @@ export class Service {
         this.broker = options.broker;
         this.sensors = options.sensors;
         this.steppers = options.steppers;
-        this.loopStatus = Service.LoopStatus.Clear;
 
         setInterval(this.loop);
     }
 
-    public getStatus = () => {
-        return this.status;
-    };
+    public getStatus = () => this.status;
 
     public home = () => {
         this.status = Service.Status.Homing;
 
         this.moves = [
             new Home({
-                speed: 100,
+                speed: 1500,
                 stepper: this.steppers[0],
-                sensors: [this.sensors[0], this.sensors[1]],
+                homeSensor: this.sensors[0],
+                limitSensor: this.sensors[1],
+                retractSpeed: 100,
                 retractPosition: 100,
             }),
 
             new Home({
-                speed: 100,
+                speed: 1500,
                 stepper: this.steppers[1],
-                sensors: [this.sensors[2], this.sensors[3]],
+                homeSensor: this.sensors[2],
+                limitSensor: this.sensors[3],
+                retractSpeed: 100,
                 retractPosition: 100,
             }),
 
             new Home({
-                speed: 100,
+                speed: 1500,
                 stepper: this.steppers[2],
-                sensors: [this.sensors[4], this.sensors[5]],
+                homeSensor: this.sensors[4],
+                limitSensor: this.sensors[5],
+                retractSpeed: 100,
                 retractPosition: 100,
             }),
         ];
@@ -81,7 +83,7 @@ export class Service {
             finalPosition[2] - currentPosition[2],
         ];
 
-        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 15000;
+        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 1500;
         const distanceMagnitude = Math.sqrt(
             Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
         );
@@ -98,22 +100,25 @@ export class Service {
             new LinearMove({
                 speed: speed[0],
                 stepper: this.steppers[0],
-                sensors: [this.sensors[0], this.sensors[1]],
                 position: finalPosition[0],
+                homeSensor: this.sensors[0],
+                limitSensor: this.sensors[1],
             }),
 
             new LinearMove({
                 speed: speed[1],
                 stepper: this.steppers[1],
-                sensors: [this.sensors[2], this.sensors[3]],
                 position: finalPosition[1],
+                homeSensor: this.sensors[2],
+                limitSensor: this.sensors[3],
             }),
 
             new LinearMove({
                 speed: speed[2],
                 stepper: this.steppers[2],
-                sensors: [this.sensors[4], this.sensors[5]],
                 position: finalPosition[2],
+                homeSensor: this.sensors[4],
+                limitSensor: this.sensors[5],
             }),
         ];
     };
@@ -151,32 +156,35 @@ export class Service {
             initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
         });
 
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : 15000;
-        const time = arc.getPerimeter() / speedMagnitude;
-        const applicateSpeed = (finalPosition[applicate] - currentPosition[applicate]) / time;
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : 1500;
+        const applicateSpeed =
+            (finalPosition[applicate] - currentPosition[applicate]) / (arc.getPerimeter() / speedMagnitude);
 
         this.moves = [
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
                 stepper: this.steppers[abscissa],
-                sensors: [this.sensors[abscissa], this.sensors[abscissa + 1]],
                 coordinate: Coordinate.Abscissa,
+                homeSensor: this.sensors[abscissa],
+                limitSensor: this.sensors[abscissa + 1],
             }),
 
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
                 stepper: this.steppers[ordinate],
-                sensors: [this.sensors[ordinate], this.sensors[ordinate + 1]],
                 coordinate: Coordinate.Ordinate,
+                homeSensor: this.sensors[ordinate],
+                limitSensor: this.sensors[ordinate + 1],
             }),
 
             new LinearMove({
                 speed: applicateSpeed,
                 stepper: this.steppers[applicate],
-                sensors: [this.sensors[applicate], this.sensors[applicate + 1]],
                 position: finalPosition[applicate],
+                homeSensor: this.sensors[applicate],
+                limitSensor: this.sensors[applicate + 1],
             }),
         ];
     };
@@ -184,31 +192,23 @@ export class Service {
     public pause = () => {
         const resumeStatus = this.status;
         this.status = Service.Status.Paused;
+        this.resume = this.setResume(resumeStatus);
+        this.steppers.reduce<void>((_, stepper) => stepper.stop(), undefined);
+    };
 
-        this.resume = () => {
-            this.status = resumeStatus;
-        };
+    private setResume = (status: Service.Status) => () => {
+        this.status = status;
+        this.steppers.reduce<void>((_, stepper) => stepper.resume(), undefined);
     };
 
     public resume = () => {};
 
     private loop = () => {
-        if (this.loopStatus === Service.LoopStatus.Running) return;
-
-        this.loopStatus = Service.LoopStatus.Running;
-
         const movesStatus = this.moves.map((move) => move.getStatus());
 
-        if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Completed)) {
+        if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
             this.status = Service.Status.Idle;
-
-            this.broker.emit("message", this.status);
-        }
-
-        if (movesStatus.some((movesStatus) => movesStatus === Move.Status.SensorStopped)) {
-            this.moves = [];
-            this.status = Service.Status.SensorStopped;
 
             this.broker.emit("message", this.status);
         }
@@ -222,8 +222,6 @@ export class Service {
         if (this.status !== Service.Status.Idle) {
             console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
         }
-
-        this.loopStatus = Service.LoopStatus.Clear;
     };
 }
 
@@ -235,12 +233,6 @@ export namespace Service {
         ArcMoving = "arc-moving",
         RapidMoving = "rapid-moving",
         LinearMoving = "linear-moving",
-        SensorStopped = "sensor-stopped",
-    }
-
-    export enum LoopStatus {
-        Clear = "clear",
-        Running = "running",
     }
 
     export type Options = {

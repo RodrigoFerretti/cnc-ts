@@ -4,57 +4,66 @@ import { Stepper } from "./stepper";
 
 export class Home extends Move {
     private stage: Home.Stage;
+    private retractSpeed: number;
     private retractPosition: number;
 
     public constructor(options: Home.Options) {
-        super({ stepper: options.stepper, sensors: options.sensors, speed: options.speed });
+        super(options);
 
         this.stage = Home.Stage.NotStarted;
+        this.retractSpeed = options.retractSpeed;
         this.retractPosition = options.retractPosition;
 
-        this.sensors[0].on("hit", this.onSensorHit);
-        this.stepper.on("move-completed", this.onStepperMoveCompleted);
-
+        this.stepper.on("destination", this.onStepperDestination);
+        this.homeSensor.on("trigger", this.onHomeSensorTrigger);
         this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
-    private onSensorHit = () => {
-        if (this.stage === Home.Stage.AInProcess) {
-            this.stepper.stop();
-            this.stepper.setPosition({ position: 0 });
-            this.stage = Home.Stage.ACompleted;
-        }
-
-        if (this.stage === Home.Stage.CInProcess) {
-            this.stepper.stop();
-            this.stepper.setPosition({ position: 0 });
-            this.stage = Home.Stage.CCompleted;
-            this.status = Move.Status.Completed;
-            this.nanoTimer.clearInterval();
-        }
-    };
-
-    private onStepperMoveCompleted = () => {
-        if (this.stage === Home.Stage.BInProcess) {
-            this.stage = Home.Stage.BCompleted;
-        }
-    };
-
     private loop = () => {
-        if (this.stage === Home.Stage.NotStarted) {
-            this.stepper.move({ position: -Infinity, speed: 15000 });
-            this.stage = Home.Stage.AInProcess;
-        }
+        if (this.stage === Home.Stage.NotStarted) return this.startStageA();
+        if (this.stage === Home.Stage.ACompleted) return this.startStageB();
+        if (this.stage === Home.Stage.BCompleted) return this.startStageC();
+    };
 
-        if (this.stage === Home.Stage.ACompleted) {
-            this.stepper.move({ position: this.retractPosition, speed: this.speed });
-            this.stage = Home.Stage.BInProcess;
-        }
+    private onStepperDestination = () => {
+        if (this.stage === Home.Stage.BInProcess) return this.finishStageB();
+    };
 
-        if (this.stage === Home.Stage.BCompleted) {
-            this.stepper.move({ position: -Infinity, speed: this.speed });
-            this.stage = Home.Stage.CInProcess;
-        }
+    private onHomeSensorTrigger = () => {
+        if (this.stage === Home.Stage.AInProcess) return this.finishStageA();
+        if (this.stage === Home.Stage.CInProcess) return this.finishStageC();
+    };
+
+    private startStageA = () => {
+        this.stepper.move({ position: -Infinity, speed: this.speed });
+        this.stage = Home.Stage.AInProcess;
+    };
+
+    private finishStageA = () => {
+        this.stepper.stop();
+        this.stepper.setPosition({ position: 0 });
+        this.stage = Home.Stage.ACompleted;
+    };
+
+    private startStageB = () => {
+        this.stepper.move({ position: this.retractPosition, speed: this.retractSpeed });
+        this.stage = Home.Stage.BInProcess;
+    };
+
+    private finishStageB = () => {
+        this.stage = Home.Stage.BCompleted;
+    };
+
+    private startStageC = () => {
+        this.stepper.move({ position: -Infinity, speed: this.retractSpeed });
+        this.stage = Home.Stage.CInProcess;
+    };
+
+    private finishStageC = () => {
+        this.stepper.stop();
+        this.stepper.setPosition({ position: 0 });
+        this.stage = Home.Stage.CCompleted;
+        return this.finish();
     };
 }
 
@@ -62,7 +71,9 @@ export namespace Home {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        sensors: [Sensor, Sensor];
+        homeSensor: Sensor;
+        limitSensor: Sensor;
+        retractSpeed: number;
         retractPosition: number;
     };
 
