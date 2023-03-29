@@ -14,8 +14,9 @@ export class Home extends Move {
         this.retractSpeed = options.retractSpeed;
         this.retractPosition = options.retractPosition;
 
-        this.stepper.on("destination", this.onStepperDestination);
+        this.stepper.on("idle", this.onStepperIdle);
         this.homeSensor.on("trigger", this.onHomeSensorTrigger);
+        this.limitSensor.on("trigger", this.break);
         this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
@@ -25,13 +26,14 @@ export class Home extends Move {
         if (this.stage === Home.Stage.BCompleted) return this.startStageC();
     };
 
-    private onStepperDestination = () => {
+    private onStepperIdle = () => {
         if (this.stage === Home.Stage.BInProcess) return this.finishStageB();
     };
 
     private onHomeSensorTrigger = () => {
         if (this.stage === Home.Stage.AInProcess) return this.finishStageA();
         if (this.stage === Home.Stage.CInProcess) return this.finishStageC();
+        this.break();
     };
 
     private startStageA = () => {

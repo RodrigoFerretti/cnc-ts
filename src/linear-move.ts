@@ -6,7 +6,9 @@ export class LinearMove extends Move {
     public constructor(options: LinearMove.Options) {
         super(options);
 
-        this.stepper.on("destination", this.finish);
+        this.stepper.on("idle", this.finish);
+        this.homeSensor.on("trigger", this.break);
+        this.limitSensor.on("trigger", this.break);
         this.stepper.move({ position: options.position, speed: this.speed });
     }
 }

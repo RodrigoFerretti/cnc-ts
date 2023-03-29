@@ -18,6 +18,8 @@ export class ArcMove extends Move {
         this.currentPointIndex = 0;
         this.timeBetweenPoints = this.arc.getPerimeter() / this.speed / this.arc.getPointsLength();
 
+        this.homeSensor.on("trigger", this.break);
+        this.limitSensor.on("trigger", this.break);
         this.nanoTimer.setInterval(this.moveToNextPoint, "", `${this.timeBetweenPoints * 1e6}u`);
     }
 

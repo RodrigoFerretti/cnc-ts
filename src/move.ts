@@ -27,6 +27,12 @@ export abstract class Move {
         this.status = Move.Status.Finished;
         this.nanoTimer.clearInterval();
     };
+
+    public break = () => {
+        this.status = Move.Status.Broke;
+        this.stepper.stop();
+        this.nanoTimer.clearInterval();
+    };
 }
 
 export namespace Move {
@@ -38,6 +44,7 @@ export namespace Move {
     };
 
     export enum Status {
+        Broke = "broke",
         Started = "started",
         Finished = "finished",
     }

@@ -67,7 +67,7 @@ export class Stepper {
     private finish = () => {
         this.nanoTimer.clearInterval();
         this.stop();
-        this.emit("destination");
+        this.emit("idle");
     };
 
     public stop = async () => {
@@ -84,11 +84,11 @@ export class Stepper {
         this.currentPosition = options.position;
     };
 
-    public on = (eventName: "destination", listener: () => void) => {
+    public on = (eventName: "idle", listener: () => void) => {
         this.eventEmitter.on(eventName, listener);
     };
 
-    private emit = (eventName: "destination") => {
+    private emit = (eventName: "idle") => {
         this.eventEmitter.emit(eventName);
     };
 }

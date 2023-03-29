@@ -214,6 +214,14 @@ export class Service {
             this.broker.emit("message", this.status);
         }
 
+        if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
+            this.moves.reduce<void>((_, move) => move.break(), undefined);
+            this.moves = [];
+            this.status = Service.Status.SensorTriggered;
+
+            this.broker.emit("message", this.status);
+        }
+
         const currentPosition: Vector<3> = [
             this.steppers[0].getPosition(),
             this.steppers[1].getPosition(),
@@ -234,6 +242,7 @@ export namespace Service {
         ArcMoving = "arc-moving",
         RapidMoving = "rapid-moving",
         LinearMoving = "linear-moving",
+        SensorTriggered = "sensor-triggered",
     }
 
     export type Options = {
