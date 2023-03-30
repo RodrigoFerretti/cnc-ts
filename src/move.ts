@@ -4,32 +4,32 @@ import { Stepper } from "./stepper";
 
 export abstract class Move {
     protected speed: number;
-    protected status: Move.Status;
     protected stepper: Stepper;
     protected nanoTimer: NanoTimer;
     protected homeSensor: Sensor;
     protected limitSensor: Sensor;
+    protected currentStatus: Move.Status;
 
     public constructor(options: Move.Options) {
         this.speed = options.speed;
-        this.status = Move.Status.Started;
+        this.currentStatus = Move.Status.Started;
         this.stepper = options.stepper;
         this.nanoTimer = new NanoTimer();
         this.homeSensor = options.homeSensor;
         this.limitSensor = options.limitSensor;
     }
 
-    public getStatus = () => {
-        return this.status;
-    };
+    public get status() {
+        return this.currentStatus;
+    }
 
     protected finish = () => {
-        this.status = Move.Status.Finished;
+        this.currentStatus = Move.Status.Finished;
         this.nanoTimer.clearInterval();
     };
 
     public break = () => {
-        this.status = Move.Status.Broke;
+        this.currentStatus = Move.Status.Broke;
         this.stepper.stop();
         this.nanoTimer.clearInterval();
     };

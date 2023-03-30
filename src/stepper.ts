@@ -29,7 +29,13 @@ export class Stepper {
         this.enablePin.writeSync(this.enable);
     }
 
-    public getPosition = () => this.currentPosition;
+    public get position() {
+        return this.currentPosition;
+    }
+
+    public set position(position: number) {
+        this.currentPosition = position;
+    }
 
     public move = (options: Stepper.MoveOptions) => {
         const distance = options.position - this.currentPosition;
@@ -47,6 +53,7 @@ export class Stepper {
         this.directionPin.writeSync(direction);
         this.remainingPulses = pulses;
 
+        this.emit(Stepper.Event.MoveStart);
         this.nanoTimer.setInterval(this.step, "", `${pulseDelay}u`);
     };
 
@@ -67,7 +74,7 @@ export class Stepper {
     private finish = () => {
         this.nanoTimer.clearInterval();
         this.stop();
-        this.emit("idle");
+        this.emit(Stepper.Event.MoveFinish);
     };
 
     public stop = async () => {
@@ -80,20 +87,21 @@ export class Stepper {
         this.enablePin.writeSync(this.enable);
     };
 
-    public setPosition = (options: Stepper.SetPositionOptions) => {
-        this.currentPosition = options.position;
-    };
-
-    public on = (eventName: "idle", listener: () => void) => {
+    public on = <T extends Stepper.Event>(eventName: T, listener: () => void) => {
         this.eventEmitter.on(eventName, listener);
     };
 
-    private emit = (eventName: "idle") => {
+    private emit = <T extends Stepper.Event>(eventName: T) => {
         this.eventEmitter.emit(eventName);
     };
 }
 
 export namespace Stepper {
+    export enum Event {
+        MoveStart = "moveStart",
+        MoveFinish = "moveFinish",
+    }
+
     export enum Pulse {
         On = 1,
         Off = 0,

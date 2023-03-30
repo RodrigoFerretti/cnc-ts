@@ -14,8 +14,8 @@ export class Service {
     private moves: Move[];
     private status: Service.Status;
     private broker: Broker;
-    private sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
-    private steppers: [Stepper, Stepper, Stepper];
+    private sensors: Service.Sensors;
+    private steppers: Service.Steppers;
 
     constructor(options: Service.Options) {
         this.moves = [];
@@ -36,27 +36,27 @@ export class Service {
         this.moves = [
             new Home({
                 speed: 1500,
-                stepper: this.steppers[0],
-                homeSensor: this.sensors[0],
-                limitSensor: this.sensors[1],
+                stepper: this.steppers.x,
+                homeSensor: this.sensors.x.home,
+                limitSensor: this.sensors.x.home,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
 
             new Home({
                 speed: 1500,
-                stepper: this.steppers[1],
-                homeSensor: this.sensors[2],
-                limitSensor: this.sensors[3],
+                stepper: this.steppers.y,
+                homeSensor: this.sensors.y.home,
+                limitSensor: this.sensors.y.home,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
 
             new Home({
                 speed: 1500,
-                stepper: this.steppers[2],
-                homeSensor: this.sensors[4],
-                limitSensor: this.sensors[5],
+                stepper: this.steppers.z,
+                homeSensor: this.sensors.z.home,
+                limitSensor: this.sensors.z.limit,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
@@ -66,60 +66,53 @@ export class Service {
     public linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
         this.status = Service.Status.LinearMoving;
 
-        const currentPosition: Vector<3> = [
-            this.steppers[0].getPosition(),
-            this.steppers[1].getPosition(),
-            this.steppers[2].getPosition(),
-        ];
-
-        const finalPosition: Vector<3> = [
-            gCode.x !== undefined ? gCode.x : currentPosition[0],
-            gCode.y !== undefined ? gCode.y : currentPosition[1],
-            gCode.z !== undefined ? gCode.z : currentPosition[2],
-        ];
-
-        const distance: Vector<3> = [
-            finalPosition[0] - currentPosition[0],
-            finalPosition[1] - currentPosition[1],
-            finalPosition[2] - currentPosition[2],
-        ];
-
-        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 1500;
-        const distanceMagnitude = Math.sqrt(
-            Math.pow(distance[0], 2) + Math.pow(distance[1], 2) + Math.pow(distance[2], 2)
+        const currentPosition = new Vector<3>(
+            this.steppers.x.position,
+            this.steppers.y.position,
+            this.steppers.z.position
         );
+
+        const finalPosition = new Vector<3>(
+            gCode.x !== undefined ? gCode.x : currentPosition.x,
+            gCode.y !== undefined ? gCode.y : currentPosition.y,
+            gCode.z !== undefined ? gCode.z : currentPosition.z
+        );
+
+        const distance = finalPosition.subtract(currentPosition);
+        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 1500;
+        const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
 
-        const speed: Vector<3> = [
-            Math.abs(distance[0] / time),
-            Math.abs(distance[1] / time),
-            Math.abs(distance[2] / time),
-        ];
+        const speed = new Vector<3>(
+            Math.abs(distance.x / time),
+            Math.abs(distance.y / time),
+            Math.abs(distance.z / time)
+        );
 
         this.moves = [
             new LinearMove({
-                speed: speed[0],
-                stepper: this.steppers[0],
-                position: finalPosition[0],
-                homeSensor: this.sensors[0],
-                limitSensor: this.sensors[1],
+                speed: speed.x,
+                stepper: this.steppers.x,
+                position: finalPosition.x,
+                homeSensor: this.sensors.x.home,
+                limitSensor: this.sensors.x.limit,
             }),
 
             new LinearMove({
-                speed: speed[1],
-                stepper: this.steppers[1],
-                position: finalPosition[1],
-                homeSensor: this.sensors[2],
-                limitSensor: this.sensors[3],
+                speed: speed.y,
+                stepper: this.steppers.y,
+                position: finalPosition.y,
+                homeSensor: this.sensors.y.home,
+                limitSensor: this.sensors.y.limit,
             }),
 
             new LinearMove({
-                speed: speed[2],
-                stepper: this.steppers[2],
-                position: finalPosition[2],
-                homeSensor: this.sensors[4],
-                limitSensor: this.sensors[5],
+                speed: speed.z,
+                stepper: this.steppers.z,
+                position: finalPosition.z,
+                homeSensor: this.sensors.z.home,
+                limitSensor: this.sensors.z.limit,
             }),
         ];
     };
@@ -127,65 +120,64 @@ export class Service {
     public arcMove = (gCode: GCode.ArcMove) => {
         this.status = Service.Status.ArcMoving;
 
-        const currentPosition: Vector<3> = [
-            this.steppers[0].getPosition(),
-            this.steppers[1].getPosition(),
-            this.steppers[2].getPosition(),
-        ];
+        const currentPosition = new Vector<3>(
+            this.steppers.x.position,
+            this.steppers.y.position,
+            this.steppers.z.position
+        );
 
-        const centerPosition: Vector<3> = [
-            currentPosition[0] + (gCode.i !== undefined ? gCode.i : 0),
-            currentPosition[1] + (gCode.j !== undefined ? gCode.j : 0),
-            currentPosition[2] + (gCode.k !== undefined ? gCode.k : 0),
-        ];
+        const centerPosition = new Vector<3>(
+            currentPosition.x + (gCode.i !== undefined ? gCode.i : 0),
+            currentPosition.y + (gCode.j !== undefined ? gCode.j : 0),
+            currentPosition.z + (gCode.k !== undefined ? gCode.k : 0)
+        );
 
-        const finalPosition: Vector<3> = [
-            gCode.x !== undefined ? gCode.x : currentPosition[0],
-            gCode.y !== undefined ? gCode.y : currentPosition[1],
-            gCode.z !== undefined ? gCode.z : currentPosition[2],
-        ];
+        const finalPosition = new Vector<3>(
+            gCode.x !== undefined ? gCode.x : currentPosition.x,
+            gCode.y !== undefined ? gCode.y : currentPosition.y,
+            gCode.z !== undefined ? gCode.z : currentPosition.z
+        );
 
-        const abscissa = gCode.i !== undefined ? 0 : 1;
-        const ordinate = gCode.j !== undefined ? 1 : 2;
-        const applicate = gCode.i === undefined ? 0 : gCode.j === undefined ? 1 : 2;
+        const arcX = gCode.i !== undefined ? Coordinate.X : Coordinate.Y;
+        const arcY = gCode.j !== undefined ? Coordinate.Y : Coordinate.Z;
+        const arcZ = gCode.i === undefined ? Coordinate.X : gCode.j === undefined ? Coordinate.Y : Coordinate.Z;
 
         const arc = new Arc({
             tolerance: 0.01,
             isClockWise: gCode.g === "02",
-            finalPosition: [finalPosition[abscissa], finalPosition[ordinate]],
-            centerPosition: [centerPosition[abscissa], centerPosition[ordinate]],
-            initialPosition: [currentPosition[abscissa], currentPosition[ordinate]],
+            finalPosition: new Vector<2>(finalPosition[arcX], finalPosition[arcY]),
+            centerPosition: new Vector<2>(centerPosition[arcX], centerPosition[arcY]),
+            initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
         const speedMagnitude = gCode.f !== undefined ? gCode.f : 1500;
-        const applicateSpeed =
-            (finalPosition[applicate] - currentPosition[applicate]) / (arc.getPerimeter() / speedMagnitude);
+        const applicateSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
-                stepper: this.steppers[abscissa],
-                coordinate: Coordinate.Abscissa,
-                homeSensor: this.sensors[abscissa],
-                limitSensor: this.sensors[abscissa + 1],
+                stepper: this.steppers[arcX],
+                coordinate: Coordinate.X,
+                homeSensor: this.sensors[arcX].home,
+                limitSensor: this.sensors[arcX].limit,
             }),
 
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
-                stepper: this.steppers[ordinate],
-                coordinate: Coordinate.Ordinate,
-                homeSensor: this.sensors[ordinate],
-                limitSensor: this.sensors[ordinate + 1],
+                stepper: this.steppers[arcY],
+                coordinate: Coordinate.Y,
+                homeSensor: this.sensors[arcY].home,
+                limitSensor: this.sensors[arcY].limit,
             }),
 
             new LinearMove({
                 speed: applicateSpeed,
-                stepper: this.steppers[applicate],
-                position: finalPosition[applicate],
-                homeSensor: this.sensors[applicate],
-                limitSensor: this.sensors[applicate + 1],
+                stepper: this.steppers[arcZ],
+                position: finalPosition[arcZ],
+                homeSensor: this.sensors[arcZ].home,
+                limitSensor: this.sensors[arcZ].limit,
             }),
         ];
     };
@@ -194,18 +186,18 @@ export class Service {
         const resumeStatus = this.status;
         this.status = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
-        this.steppers.reduce<void>((_, stepper) => stepper.stop(), undefined);
+        Object.values(this.steppers).reduce<void>((_, stepper) => stepper.stop(), undefined);
     };
 
     private setResume = (status: Service.Status) => () => {
         this.status = status;
-        this.steppers.reduce<void>((_, stepper) => stepper.resume(), undefined);
+        Object.values(this.steppers).reduce<void>((_, stepper) => stepper.resume(), undefined);
     };
 
     public resume: () => void;
 
     private loop = () => {
-        const movesStatus = this.moves.map((move) => move.getStatus());
+        const movesStatus = this.moves.map((move) => move.status);
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
@@ -222,14 +214,14 @@ export class Service {
             this.broker.emit("message", this.status);
         }
 
-        const currentPosition: Vector<3> = [
-            this.steppers[0].getPosition(),
-            this.steppers[1].getPosition(),
-            this.steppers[2].getPosition(),
-        ];
+        const currentPosition = new Vector<3>(
+            this.steppers.x.position,
+            this.steppers.y.position,
+            this.steppers.z.position
+        );
 
         if (this.status !== Service.Status.Idle) {
-            console.log("message", `X${currentPosition[0]} Y${currentPosition[1]} Z${currentPosition[2]}`);
+            console.log("message", `X${currentPosition.x} Y${currentPosition.y} Z${currentPosition.z}`);
         }
     };
 }
@@ -247,7 +239,19 @@ export namespace Service {
 
     export type Options = {
         broker: Broker;
-        sensors: [Sensor, Sensor, Sensor, Sensor, Sensor, Sensor];
-        steppers: [Stepper, Stepper, Stepper];
+        sensors: Service.Sensors;
+        steppers: Service.Steppers;
+    };
+
+    export type Sensors = {
+        x: { home: Sensor; limit: Sensor };
+        y: { home: Sensor; limit: Sensor };
+        z: { home: Sensor; limit: Sensor };
+    };
+
+    export type Steppers = {
+        x: Stepper;
+        y: Stepper;
+        z: Stepper;
     };
 }

@@ -1,5 +1,5 @@
 export enum Coordinate {
-    Abscissa,
-    Ordinate,
-    Applicate,
+    X = "x",
+    Y = "y",
+    Z = "z",
 }

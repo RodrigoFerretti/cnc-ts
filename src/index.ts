@@ -26,11 +26,15 @@ const sensorZB = new Sensor({ i2C, port: 5 });
 
 const broker = new Broker();
 
-const service = new Service({
-    broker,
-    sensors: [sensorXA, sensorXB, sensorYA, sensorYB, sensorZA, sensorZB],
-    steppers: [stepperX, stepperY, stepperZ],
-});
+const sensors: Service.Sensors = {
+    x: { home: sensorXA, limit: sensorXB },
+    y: { home: sensorYA, limit: sensorYB },
+    z: { home: sensorZA, limit: sensorZB },
+};
+
+const steppers: Service.Steppers = { x: stepperX, y: stepperY, z: stepperZ };
+
+const service = new Service({ broker, sensors, steppers });
 
 const controller = new Controller({ service });
 
