@@ -8,7 +8,7 @@ export class Vector<N extends 2 | 3> {
     constructor(...args: number[]) {
         this.x = args[0];
         this.y = args[1];
-        this.z = args[2] as N extends 3 ? number : undefined;
+        this.z = args[2] as typeof this.z;
     }
 
     public get magnitude() {
