@@ -15,15 +15,7 @@ export class Vector<N extends 2 | 3> {
         return Math.sqrt(this.x ** 2 + this.y ** 2 + (this.z ?? 0) ** 2);
     }
 
-    public add(v: Vector<N>) {
-        return new Vector(this.x + v.x, this.y + v.y, (this.z ?? 0) + (v.z ?? 0));
-    }
-
     public subtract(v: Vector<N>) {
         return new Vector<N>(this.x - v.x, this.y - v.y, (this.z ?? 0) - (v.z ?? 0));
-    }
-
-    public dot(v: Vector<N>) {
-        return this.x * v.x + this.y * v.y + (this.z ?? 0) * (v.z ?? 0);
     }
 }
