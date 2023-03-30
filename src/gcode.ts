@@ -13,7 +13,7 @@ export namespace GCode {
         M99 = "M99",
     }
 
-    const commandRegex = /^(G00|G01|G02|G03|G28|M00|M99)/;
+    const commandRegex = new RegExp(`^(${Object.values(GCode.Command).join("|")})`);
 
     const matchCommand = (message: string) => {
         const match = message.match(commandRegex);
