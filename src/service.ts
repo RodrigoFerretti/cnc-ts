@@ -144,14 +144,14 @@ export class Service {
 
         const arc = new Arc({
             tolerance: 0.01,
-            isClockWise: gCode.g === "02",
+            isClockWise: gCode.command === GCode.Command.G02,
             finalPosition: new Vector<2>(finalPosition[arcX], finalPosition[arcY]),
             centerPosition: new Vector<2>(centerPosition[arcX], centerPosition[arcY]),
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
         const speedMagnitude = gCode.f !== undefined ? gCode.f : 1500;
-        const applicateSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
+        const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
             new ArcMove({
@@ -173,7 +173,7 @@ export class Service {
             }),
 
             new LinearMove({
-                speed: applicateSpeed,
+                speed: linearMoveSpeed,
                 stepper: this.steppers[arcZ],
                 position: finalPosition[arcZ],
                 homeSensor: this.sensors[arcZ].home,

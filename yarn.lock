@@ -47,13 +47,6 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.3.tgz#472eaab5f15c1ffdd7f8628bd4c4f753995ec79e"
   integrity sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==
 
-"@types/i2c-bus@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@types/i2c-bus/-/i2c-bus-5.1.0.tgz#241b91d40deb0b2d08ed60862efa655e53e96c30"
-  integrity sha512-zBwBpfaFzKtYaS2j/sh+m/zKRcbXuG26/wWlJq3F9+oWXQ9DSxuJXOU+t1PMorj3DBZzpLO8LqbVTGRE1PUb3g==
-  dependencies:
-    "@types/node" "*"
-
 "@types/nanotimer@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@types/nanotimer/-/nanotimer-0.3.0.tgz#8db511a7ddcac749afd28d312fb275801b5ed51d"
@@ -243,14 +236,6 @@ has@^1.0.3:
   integrity sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
   dependencies:
     function-bind "^1.1.1"
-
-i2c-bus@5.2.2:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/i2c-bus/-/i2c-bus-5.2.2.tgz#0c727f5e99443c5734b4f0e05b45748ba85008fa"
-  integrity sha512-b2y/et08rqggEjqod6QxV0Ng+RlSkZXsdE+E1aZEQBahepZ9uFD9XfA77Y8O9SgyhwfGEn+CNxsw0gvXW1/m4g==
-  dependencies:
-    bindings "^1.5.0"
-    nan "^2.14.2"
 
 inflight@^1.0.4:
   version "1.0.6"

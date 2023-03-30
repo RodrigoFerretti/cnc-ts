@@ -54,6 +54,7 @@ export class Stepper {
         this.remainingPulses = pulses;
 
         this.emit(Stepper.Event.MoveStart);
+
         this.nanoTimer.setInterval(this.step, "", `${pulseDelay}u`);
     };
 

@@ -20,6 +20,7 @@ export class ArcMove extends Move {
 
         this.homeSensor.on(Sensor.Event.Trigger, this.break);
         this.limitSensor.on(Sensor.Event.Trigger, this.break);
+
         this.nanoTimer.setInterval(this.moveToNextPoint, "", `${this.timeBetweenPoints * 1e6}u`);
     }
 

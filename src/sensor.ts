@@ -1,18 +1,21 @@
+import { Gpio } from "onoff";
 import { EventEmitter } from "stream";
-import { I2C } from "./i2c";
+import { Debouncer } from "./debouncer";
 
 export class Sensor {
-    private i2C: I2C;
-    private port: number;
+    private pin: Gpio;
+    private debouncer: Debouncer;
     private eventEmitter: EventEmitter;
 
     constructor(options: Sensor.Options) {
-        this.i2C = options.i2C;
-        this.port = options.port;
+        this.pin = options.pin;
+        this.debouncer = new Debouncer({ time: options.debounceTime });
         this.eventEmitter = new EventEmitter();
 
-        this.i2C.on(this.port, () => this.emit(Sensor.Event.Trigger));
+        setInterval(this.read);
     }
+
+    private read = () => this.debouncer.debounce(this.pin.readSync()) && this.emit(Sensor.Event.Trigger);
 
     private emit = <T extends Sensor.Event>(eventName: T) => {
         this.eventEmitter.emit(eventName);
@@ -25,8 +28,8 @@ export class Sensor {
 
 export namespace Sensor {
     export type Options = {
-        i2C: I2C;
-        port: number;
+        pin: Gpio;
+        debounceTime: number;
     };
 
     export enum Event {
