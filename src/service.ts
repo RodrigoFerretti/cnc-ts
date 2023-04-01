@@ -11,19 +11,17 @@ import { Stepper } from "./stepper";
 import { Vector } from "./vector";
 
 export class Service {
+    private axes: Service.Axes;
     private moves: Move[];
     private status: Service.Status;
     private broker: Broker;
-    private sensors: Service.Sensors;
-    private steppers: Service.Steppers;
 
     constructor(options: Service.Options) {
+        this.axes = options.axes;
         this.moves = [];
         this.status = Service.Status.Idle;
         this.resume = this.setResume(this.status);
         this.broker = options.broker;
-        this.sensors = options.sensors;
-        this.steppers = options.steppers;
 
         setInterval(this.loop);
     }
@@ -36,27 +34,39 @@ export class Service {
         this.moves = [
             new Home({
                 speed: 1500,
-                stepper: this.steppers.x,
-                homeSensor: this.sensors.x.home,
-                limitSensor: this.sensors.x.home,
+                stepper: this.axes.x.stepper,
+                homeSensor: this.axes.x.homeSensor,
+                limitSensor: this.axes.x.limitSensor,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
-
             new Home({
                 speed: 1500,
-                stepper: this.steppers.y,
-                homeSensor: this.sensors.y.home,
-                limitSensor: this.sensors.y.home,
+                stepper: this.axes.y.stepper,
+                homeSensor: this.axes.y.homeSensor,
+                limitSensor: this.axes.y.limitSensor,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
-
             new Home({
                 speed: 1500,
-                stepper: this.steppers.z,
-                homeSensor: this.sensors.z.home,
-                limitSensor: this.sensors.z.limit,
+                stepper: this.axes.z.stepper,
+                homeSensor: this.axes.z.homeSensor,
+                limitSensor: this.axes.z.limitSensor,
+                retractSpeed: 100,
+                retractPosition: 100,
+            }),
+        ];
+
+        if (this.axes.slave === undefined) return;
+
+        this.moves = [
+            ...this.moves,
+            new Home({
+                speed: 1500,
+                stepper: this.axes.slave.stepper,
+                homeSensor: this.axes.slave.homeSensor,
+                limitSensor: this.axes.slave.limitSensor,
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
@@ -67,9 +77,9 @@ export class Service {
         this.status = Service.Status.LinearMoving;
 
         const currentPosition = new Vector<3>(
-            this.steppers.x.position,
-            this.steppers.y.position,
-            this.steppers.z.position
+            this.axes.x.stepper.position,
+            this.axes.y.stepper.position,
+            this.axes.z.stepper.position
         );
 
         const finalPosition = new Vector<3>(
@@ -93,26 +103,39 @@ export class Service {
         this.moves = [
             new LinearMove({
                 speed: speed.x,
-                stepper: this.steppers.x,
+                stepper: this.axes.x.stepper,
                 position: finalPosition.x,
-                homeSensor: this.sensors.x.home,
-                limitSensor: this.sensors.x.limit,
+                homeSensor: this.axes.x.homeSensor,
+                limitSensor: this.axes.x.limitSensor,
             }),
-
             new LinearMove({
                 speed: speed.y,
-                stepper: this.steppers.y,
+                stepper: this.axes.y.stepper,
                 position: finalPosition.y,
-                homeSensor: this.sensors.y.home,
-                limitSensor: this.sensors.y.limit,
+                homeSensor: this.axes.y.homeSensor,
+                limitSensor: this.axes.y.limitSensor,
             }),
-
             new LinearMove({
                 speed: speed.z,
-                stepper: this.steppers.z,
+                stepper: this.axes.z.stepper,
                 position: finalPosition.z,
-                homeSensor: this.sensors.z.home,
-                limitSensor: this.sensors.z.limit,
+                homeSensor: this.axes.z.homeSensor,
+                limitSensor: this.axes.z.limitSensor,
+            }),
+        ];
+
+        if (this.axes.slave === undefined) return;
+
+        const slaveCoordinate = this.axes.slave.coordinate;
+
+        this.moves = [
+            ...this.moves,
+            new LinearMove({
+                speed: speed[slaveCoordinate],
+                stepper: this.axes.slave.stepper,
+                position: finalPosition[slaveCoordinate],
+                homeSensor: this.axes.slave.homeSensor,
+                limitSensor: this.axes.slave.limitSensor,
             }),
         ];
     };
@@ -121,9 +144,9 @@ export class Service {
         this.status = Service.Status.ArcMoving;
 
         const currentPosition = new Vector<3>(
-            this.steppers.x.position,
-            this.steppers.y.position,
-            this.steppers.z.position
+            this.axes.x.stepper.position,
+            this.axes.y.stepper.position,
+            this.axes.z.stepper.position
         );
 
         const centerPosition = new Vector<3>(
@@ -157,28 +180,50 @@ export class Service {
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
-                stepper: this.steppers[arcX],
+                stepper: this.axes[arcX].stepper,
                 coordinate: Coordinate.X,
-                homeSensor: this.sensors[arcX].home,
-                limitSensor: this.sensors[arcX].limit,
+                homeSensor: this.axes[arcX].homeSensor,
+                limitSensor: this.axes[arcX].limitSensor,
             }),
-
             new ArcMove({
                 arc,
                 speed: speedMagnitude,
-                stepper: this.steppers[arcY],
+                stepper: this.axes[arcY].stepper,
                 coordinate: Coordinate.Y,
-                homeSensor: this.sensors[arcY].home,
-                limitSensor: this.sensors[arcY].limit,
+                homeSensor: this.axes[arcY].homeSensor,
+                limitSensor: this.axes[arcY].limitSensor,
             }),
-
             new LinearMove({
                 speed: linearMoveSpeed,
-                stepper: this.steppers[arcZ],
+                stepper: this.axes[arcZ].stepper,
                 position: finalPosition[arcZ],
-                homeSensor: this.sensors[arcZ].home,
-                limitSensor: this.sensors[arcZ].limit,
+                homeSensor: this.axes[arcZ].homeSensor,
+                limitSensor: this.axes[arcZ].limitSensor,
             }),
+        ];
+
+        if (this.axes.slave === undefined) return;
+
+        const slaveCoordinate = this.axes.slave.coordinate;
+
+        this.moves = [
+            ...this.moves,
+            slaveCoordinate === arcZ
+                ? new LinearMove({
+                      speed: linearMoveSpeed,
+                      stepper: this.axes.slave.stepper,
+                      position: finalPosition[slaveCoordinate],
+                      homeSensor: this.axes.slave.homeSensor,
+                      limitSensor: this.axes.slave.limitSensor,
+                  })
+                : new ArcMove({
+                      arc,
+                      speed: speedMagnitude,
+                      stepper: this.axes.slave.stepper,
+                      coordinate: slaveCoordinate === arcX ? Coordinate.X : Coordinate.Y,
+                      homeSensor: this.axes.slave.homeSensor,
+                      limitSensor: this.axes.slave.limitSensor,
+                  }),
         ];
     };
 
@@ -186,12 +231,12 @@ export class Service {
         const resumeStatus = this.status;
         this.status = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
-        Object.values(this.steppers).reduce<void>((_, stepper) => stepper.stop(), undefined);
+        Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.stop(), undefined);
     };
 
     private setResume = (status: Service.Status) => () => {
         this.status = status;
-        Object.values(this.steppers).reduce<void>((_, stepper) => stepper.resume(), undefined);
+        Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.resume(), undefined);
     };
 
     public resume: () => void;
@@ -215,9 +260,9 @@ export class Service {
         }
 
         const currentPosition = new Vector<3>(
-            this.steppers.x.position,
-            this.steppers.y.position,
-            this.steppers.z.position
+            this.axes.x.stepper.position,
+            this.axes.y.stepper.position,
+            this.axes.z.stepper.position
         );
 
         if (this.status !== Service.Status.Idle) {
@@ -238,20 +283,21 @@ export namespace Service {
     }
 
     export type Options = {
+        axes: Axes;
         broker: Broker;
-        sensors: Service.Sensors;
-        steppers: Service.Steppers;
     };
 
-    export type Sensors = {
-        x: { home: Sensor; limit: Sensor };
-        y: { home: Sensor; limit: Sensor };
-        z: { home: Sensor; limit: Sensor };
+    export type Axes = {
+        slave?: SlaveAxis;
+    } & Record<Coordinate, Axis>;
+
+    export type Axis = {
+        stepper: Stepper;
+        homeSensor: Sensor;
+        limitSensor: Sensor;
     };
 
-    export type Steppers = {
-        x: Stepper;
-        y: Stepper;
-        z: Stepper;
-    };
+    export type SlaveAxis = {
+        coordinate: Coordinate;
+    } & Axis;
 }

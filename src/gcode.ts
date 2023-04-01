@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type GCode = z.infer<typeof GCode.schema>;
+export type GCode = GCode.GCode;
 
 export namespace GCode {
     export enum Command {
@@ -13,12 +13,7 @@ export namespace GCode {
         M99 = "M99",
     }
 
-    const commandRegex = new RegExp(`^(${Object.values(GCode.Command).join("|")})`);
-
-    const matchCommand = (message: string) => {
-        const match = message.match(commandRegex);
-        return match ? (match[0] as GCode.Command) : null;
-    };
+    const commandRegex = new RegExp(`^(${Object.values(Command).join("|")})`);
 
     const stringNumber = z.preprocess((string) => (string === undefined ? undefined : Number(string)), z.number());
 
@@ -44,7 +39,7 @@ export namespace GCode {
 
     const rapidMoveSchema = z
         .object({
-            command: z.literal(GCode.Command.G00),
+            command: z.literal(Command.G00),
             x: stringNumber.optional(),
             y: stringNumber.optional(),
             z: stringNumber.optional(),
@@ -58,7 +53,7 @@ export namespace GCode {
 
     const linearMoveSchema = z
         .object({
-            command: z.literal(GCode.Command.G01),
+            command: z.literal(Command.G01),
             x: stringNumber.optional(),
             y: stringNumber.optional(),
             z: stringNumber.optional(),
@@ -74,7 +69,7 @@ export namespace GCode {
 
     const arcMoveSchema = z
         .object({
-            command: z.union([z.literal(GCode.Command.G02), z.literal(GCode.Command.G03)]),
+            command: z.union([z.literal(Command.G02), z.literal(Command.G03)]),
             x: stringNumber.optional(),
             y: stringNumber.optional(),
             z: stringNumber.optional(),
@@ -94,7 +89,7 @@ export namespace GCode {
 
     const homeSchema = z
         .object({
-            command: z.literal(GCode.Command.G28),
+            command: z.literal(Command.G28),
         })
         .strict();
 
@@ -104,7 +99,7 @@ export namespace GCode {
 
     const pauseSchema = z
         .object({
-            command: z.literal(GCode.Command.M00),
+            command: z.literal(Command.M00),
         })
         .strict();
 
@@ -114,42 +109,46 @@ export namespace GCode {
 
     const resumeSchema = z
         .object({
-            command: z.literal(GCode.Command.M99),
+            command: z.literal(Command.M99),
         })
         .strict();
 
     const resumeRegex = /^M99$/;
 
-    export const schema = z.union([
-        rapidMoveSchema,
-        linearMoveSchema,
-        arcMoveSchema,
-        homeSchema,
-        pauseSchema,
-        resumeSchema,
-    ]);
-
-    const regex: Record<GCode.Command, RegExp> = {
-        [GCode.Command.G00]: rapidMoveRegex,
-        [GCode.Command.G01]: linearMoveRegex,
-        [GCode.Command.G02]: arcMoveRegex,
-        [GCode.Command.G03]: arcMoveRegex,
-        [GCode.Command.G28]: homeRegex,
-        [GCode.Command.M00]: pauseRegex,
-        [GCode.Command.M99]: resumeRegex,
+    const regex: Record<Command, RegExp> = {
+        [Command.G00]: rapidMoveRegex,
+        [Command.G01]: linearMoveRegex,
+        [Command.G02]: arcMoveRegex,
+        [Command.G03]: arcMoveRegex,
+        [Command.G28]: homeRegex,
+        [Command.M00]: pauseRegex,
+        [Command.M99]: resumeRegex,
     };
 
-    type MatchParametersOptions = { command: GCode.Command; message: string };
+    const schema = {
+        [Command.G00]: rapidMoveSchema,
+        [Command.G01]: linearMoveSchema,
+        [Command.G02]: arcMoveSchema,
+        [Command.G03]: arcMoveSchema,
+        [Command.G28]: homeSchema,
+        [Command.M00]: pauseSchema,
+        [Command.M99]: resumeSchema,
+    } satisfies Record<Command, z.ZodSchema>;
 
-    const matchParameters = (options: MatchParametersOptions) => {
-        const match = regex[options.command].exec(options.message);
+    export type GCode = z.infer<z.ZodUnion<[typeof schema[keyof typeof schema]]>>;
+
+    const matchCommand = (message: string) => {
+        const match = message.match(commandRegex);
+        return match ? (match[0] as Command) : null;
+    };
+
+    const matchParameters = (command: Command, message: string) => {
+        const match = regex[command].exec(message);
         return match?.groups || {};
     };
 
-    type ValidateOptions = { data: unknown };
-
-    const validate = (options: ValidateOptions): GCode | null => {
-        const result = schema.safeParse(options.data);
+    const validate = (command: Command, parameters: Record<string, string>): GCode | null => {
+        const result = schema[command].safeParse({ command, ...parameters });
         return result.success === true ? result.data : null;
     };
 
@@ -157,8 +156,8 @@ export namespace GCode {
         const command = matchCommand(message);
         if (command === null) return null;
 
-        const parameters = matchParameters({ command, message });
-        const gCode = validate({ data: { ...parameters, command } });
+        const parameters = matchParameters(command, message);
+        const gCode = validate(command, parameters);
 
         return gCode;
     };
