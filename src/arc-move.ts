@@ -7,7 +7,7 @@ import { Stepper } from "./stepper";
 export class ArcMove extends Move {
     private arc: Arc;
     private coordinate: Coordinate.X | Coordinate.Y;
-    private currentPointIndex: number;
+    private currentPoint: number;
     private timeBetweenPoints: number;
 
     public constructor(options: ArcMove.Options) {
@@ -15,8 +15,8 @@ export class ArcMove extends Move {
 
         this.arc = options.arc;
         this.coordinate = options.coordinate;
-        this.currentPointIndex = 0;
-        this.timeBetweenPoints = this.arc.perimeter / this.speed / this.arc.pointsLength;
+        this.currentPoint = 0;
+        this.timeBetweenPoints = this.arc.perimeter / this.speed / this.arc.totalPoints;
 
         this.homeSensor.on(Sensor.Event.Trigger, this.break);
         this.limitSensor.on(Sensor.Event.Trigger, this.break);
@@ -25,14 +25,14 @@ export class ArcMove extends Move {
     }
 
     private moveToNextPoint = () => {
-        if (this.currentPointIndex === this.arc.pointsLength + 1) return this.finish();
+        if (this.currentPoint === this.arc.totalPoints + 1) return this.finish();
 
-        const pointPosition = this.arc.getPointPosition({ index: this.currentPointIndex });
+        const pointPosition = this.arc.getPointPosition(this.currentPoint);
         const position = Math.round(pointPosition[this.coordinate]);
         const speed = Math.abs(position - this.stepper.position) / this.timeBetweenPoints;
 
         this.stepper.move({ position, speed });
-        this.currentPointIndex++;
+        this.currentPoint++;
     };
 }
 

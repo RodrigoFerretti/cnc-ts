@@ -88,7 +88,7 @@ export class Service {
             gCode.z !== undefined ? gCode.z : currentPosition.z
         );
 
-        const distance = finalPosition.subtract(currentPosition);
+        const distance = Vector.subtract(finalPosition, currentPosition);
         const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 1500;
         const distanceMagnitude = distance.magnitude;
 
@@ -149,11 +149,8 @@ export class Service {
             this.axes.z.stepper.position
         );
 
-        const centerPosition = new Vector<3>(
-            currentPosition.x + (gCode.i !== undefined ? gCode.i : 0),
-            currentPosition.y + (gCode.j !== undefined ? gCode.j : 0),
-            currentPosition.z + (gCode.k !== undefined ? gCode.k : 0)
-        );
+        const centerOffset = new Vector<3>(gCode.i || 0, gCode.j || 0, gCode.k || 0);
+        const centerPosition = Vector.add(currentPosition, centerOffset);
 
         const finalPosition = new Vector<3>(
             gCode.x !== undefined ? gCode.x : currentPosition.x,
@@ -166,7 +163,7 @@ export class Service {
         const arcZ = gCode.i === undefined ? Coordinate.X : gCode.j === undefined ? Coordinate.Y : Coordinate.Z;
 
         const arc = new Arc({
-            tolerance: 0.01,
+            resolution: 1,
             isClockWise: gCode.command === GCode.Command.G02,
             finalPosition: new Vector<2>(finalPosition[arcX], finalPosition[arcY]),
             centerPosition: new Vector<2>(centerPosition[arcX], centerPosition[arcY]),
