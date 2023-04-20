@@ -69,6 +69,6 @@ const broker = new Broker();
 const service = new Service({ broker, axes: { x: xAxis, y: yAxis, z: zAxis } });
 const controller = new Controller({ service });
 const router = new Router({ controller });
-const server = new Server({ config, router, broker });
+const server = new Server({ router, broker });
 
 server.start(8080);

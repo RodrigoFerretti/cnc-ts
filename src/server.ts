@@ -1,7 +1,6 @@
 import express, { Express } from "express";
 import expressws, { Instance } from "express-ws";
 import { Broker } from "./broker";
-import { Config } from "./config";
 import { Router } from "./router";
 
 export class Server {
@@ -31,8 +30,6 @@ export class Server {
                 webSocket.send(message);
             });
         });
-
-        this.app.get("/config", (_req, res) => res.json(options.config));
     }
 
     public start = (port: number) => {
@@ -44,6 +41,5 @@ export namespace Server {
     export type Options = {
         router: Router;
         broker: Broker;
-        config: Config;
     };
 }
