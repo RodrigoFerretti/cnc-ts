@@ -5,6 +5,7 @@ import { EventEmitter } from "stream";
 export class Stepper {
     private pulse: Stepper.Pulse;
     private enable: Stepper.Enable;
+    private maxSpeed: number;
     private pulsePin: Gpio;
     private direction: Stepper.Direction;
     private nanoTimer: NanoTimer;
@@ -17,6 +18,7 @@ export class Stepper {
     constructor(options: Stepper.Options) {
         this.pulse = Stepper.Pulse.Off;
         this.enable = Stepper.Enable.Off;
+        this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
         this.direction = Stepper.Direction.Forwards;
         this.nanoTimer = new NanoTimer();
@@ -36,6 +38,8 @@ export class Stepper {
     public set position(position: number) {
         this.currentPosition = position;
     }
+
+    public getMaxSpeed = () => this.maxSpeed;
 
     public move = (options: Stepper.MoveOptions) => {
         const distance = options.position - this.currentPosition;
@@ -119,6 +123,7 @@ export namespace Stepper {
     }
 
     export type Options = {
+        maxSpeed: number;
         pulsePin: Gpio;
         enablePin: Gpio;
         directionPin: Gpio;

@@ -1,43 +1,74 @@
 import { Broker } from "./broker";
+import { Config } from "./config";
 import { Controller } from "./controller";
-import { Coordinate } from "./coodinate";
+import { Gpio } from "./gpio";
 import { Router } from "./router";
 import { Sensor } from "./sensor";
 import { Server } from "./server";
 import { Service } from "./service";
 import { Stepper } from "./stepper";
 
-const gpioMock = { writeSync: (..._args: any[]) => undefined, readSync: (..._args: any[]) => 0 } as never;
+const config = Config.get();
 
-const stepperX = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock });
-const stepperY0 = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock });
-const stepperY1 = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock });
-const stepperZ = new Stepper({ directionPin: gpioMock, enablePin: gpioMock, pulsePin: gpioMock });
+const stepperX = new Stepper({
+    directionPin: new Gpio(config.xAxisStepperDirectionPin, "out"),
+    enablePin: new Gpio(config.xAxisStepperEnablePin, "out"),
+    pulsePin: new Gpio(config.xAxisStepperPulsePin, "out"),
+    maxSpeed: config.xAxisStepperMaxSpeed,
+});
 
-const sensorXA = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorXB = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorY0A = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorY0B = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorY1A = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorY1B = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorZA = new Sensor({ pin: gpioMock, debounceTime: 20 });
-const sensorZB = new Sensor({ pin: gpioMock, debounceTime: 20 });
+const stepperY = new Stepper({
+    directionPin: new Gpio(config.yAxisStepperDirectionPin, "out"),
+    enablePin: new Gpio(config.yAxisStepperEnablePin, "out"),
+    pulsePin: new Gpio(config.yAxisStepperPulsePin, "out"),
+    maxSpeed: config.yAxisStepperMaxSpeed,
+});
+
+const stepperZ = new Stepper({
+    directionPin: new Gpio(config.zAxisStepperDirectionPin, "out"),
+    enablePin: new Gpio(config.zAxisStepperEnablePin, "out"),
+    pulsePin: new Gpio(config.zAxisStepperPulsePin, "out"),
+    maxSpeed: config.zAxisStepperMaxSpeed,
+});
+
+const homeSensorX = new Sensor({
+    pin: new Gpio(config.xAxisHomeSensorPin, "in"),
+    debounceTime: config.xAxisHomeSensorDebounceTime,
+});
+
+const homeSensorY = new Sensor({
+    pin: new Gpio(config.yAxisHomeSensorPin, "in"),
+    debounceTime: config.yAxisHomeSensorDebounceTime,
+});
+
+const homeSensorZ = new Sensor({
+    pin: new Gpio(config.zAxisHomeSensorPin, "in"),
+    debounceTime: config.zAxisHomeSensorDebounceTime,
+});
+
+const limitSensorX = new Sensor({
+    pin: new Gpio(config.xAxisLimitSensorPin, "in"),
+    debounceTime: config.xAxisLimitSensorDebounceTime,
+});
+
+const limitSensorY = new Sensor({
+    pin: new Gpio(config.yAxisLimitSensorPin, "in"),
+    debounceTime: config.yAxisLimitSensorDebounceTime,
+});
+
+const limitSensorZ = new Sensor({
+    pin: new Gpio(config.zAxisLimitSensorPin, "in"),
+    debounceTime: config.zAxisLimitSensorDebounceTime,
+});
+
+const xAxis: Service.Axis = { stepper: stepperX, homeSensor: homeSensorX, limitSensor: limitSensorX };
+const yAxis: Service.Axis = { stepper: stepperY, homeSensor: homeSensorY, limitSensor: limitSensorY };
+const zAxis: Service.Axis = { stepper: stepperZ, homeSensor: homeSensorZ, limitSensor: limitSensorZ };
 
 const broker = new Broker();
-
-const xAxis: Service.Axis = { stepper: stepperX, homeSensor: sensorXA, limitSensor: sensorXB };
-const y0Axis: Service.Axis = { stepper: stepperY0, homeSensor: sensorY0A, limitSensor: sensorY0B };
-const y1Axis: Service.Axis = { stepper: stepperY1, homeSensor: sensorY1A, limitSensor: sensorY1B };
-const zAxis: Service.Axis = { stepper: stepperZ, homeSensor: sensorZA, limitSensor: sensorZB };
-
-const slaveAxis: Service.SlaveAxis = { coordinate: Coordinate.Y, ...y1Axis };
-
-const service = new Service({ broker, axes: { x: xAxis, y: y0Axis, z: zAxis, slave: slaveAxis } });
-
+const service = new Service({ broker, axes: { x: xAxis, y: yAxis, z: zAxis } });
 const controller = new Controller({ service });
-
 const router = new Router({ controller });
-
 const server = new Server({ router, broker });
 
 server;

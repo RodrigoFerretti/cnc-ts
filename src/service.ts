@@ -26,6 +26,8 @@ export class Service {
         setInterval(this.loop);
     }
 
+    private getSteppersMaxSpeed = () => Math.min(...Object.values(this.axes).map((axis) => axis.stepper.getMaxSpeed()));
+
     public getStatus = () => this.status;
 
     public home = () => {
@@ -33,7 +35,7 @@ export class Service {
 
         this.moves = [
             new Home({
-                speed: 1500,
+                speed: this.axes.x.stepper.getMaxSpeed(),
                 stepper: this.axes.x.stepper,
                 homeSensor: this.axes.x.homeSensor,
                 limitSensor: this.axes.x.limitSensor,
@@ -41,7 +43,7 @@ export class Service {
                 retractPosition: 100,
             }),
             new Home({
-                speed: 1500,
+                speed: this.axes.y.stepper.getMaxSpeed(),
                 stepper: this.axes.y.stepper,
                 homeSensor: this.axes.y.homeSensor,
                 limitSensor: this.axes.y.limitSensor,
@@ -49,7 +51,7 @@ export class Service {
                 retractPosition: 100,
             }),
             new Home({
-                speed: 1500,
+                speed: this.axes.z.stepper.getMaxSpeed(),
                 stepper: this.axes.z.stepper,
                 homeSensor: this.axes.z.homeSensor,
                 limitSensor: this.axes.z.limitSensor,
@@ -63,7 +65,7 @@ export class Service {
         this.moves = [
             ...this.moves,
             new Home({
-                speed: 1500,
+                speed: this.axes.slave.stepper.getMaxSpeed(),
                 stepper: this.axes.slave.stepper,
                 homeSensor: this.axes.slave.homeSensor,
                 limitSensor: this.axes.slave.limitSensor,
@@ -89,7 +91,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : 1500;
+        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -170,7 +172,7 @@ export class Service {
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : 1500;
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
         const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
