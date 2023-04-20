@@ -1,15 +1,23 @@
-import { WebSocketServer } from "ws";
+import express, { Express } from "express";
+import expressws, { Instance } from "express-ws";
 import { Broker } from "./broker";
+import { Config } from "./config";
 import { Router } from "./router";
 
-export class Server extends WebSocketServer {
+export class Server {
+    private app: Express;
+    private wss: Instance;
+
     public constructor(options: Server.Options) {
         const router = options.router;
         const broker = options.broker;
 
-        super({ port: 8080 }, () => console.log("Websocket server running on port 8080"));
+        this.app = express();
+        this.wss = expressws(this.app);
 
-        this.on("connection", (webSocket) => {
+        this.app.use(express.json());
+
+        this.wss.app.ws("/", (webSocket) => {
             webSocket.send("connected");
 
             webSocket.on("message", (data) => {
@@ -18,19 +26,24 @@ export class Server extends WebSocketServer {
 
                 webSocket.send(responseMessage);
             });
-        });
 
-        broker.on("message", (message) => {
-            this.clients.forEach((webSocket) => {
+            broker.on("message", (message) => {
                 webSocket.send(message);
             });
         });
+
+        this.app.get("/config", (_req, res) => res.json(options.config));
     }
+
+    public start = (port: number) => {
+        this.app.listen(8080, () => console.log("Server running on port 8080"));
+    };
 }
 
 export namespace Server {
     export type Options = {
         router: Router;
         broker: Broker;
+        config: Config;
     };
 }
