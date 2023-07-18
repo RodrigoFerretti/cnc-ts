@@ -6,8 +6,8 @@ export class Arc {
     public readonly perimeter: number;
     public readonly resolution: number;
     public readonly isClockWise: boolean;
-    public readonly totalPoints: number;
     public readonly finalPosition: Vector<2>;
+    public readonly totalPositions: number;
     public readonly centerPosition: Vector<2>;
     public readonly initialPosition: Vector<2>;
     public readonly angleResolution: number;
@@ -29,26 +29,26 @@ export class Arc {
         this.radius = Vector.subtract(this.initialPosition, this.centerPosition).magnitude;
         this.perimeter = Math.abs(this.radius * this.angle);
 
-        const resolutionPosition = new Vector<2>(
+        const firstPosition = new Vector<2>(
             this.resolution,
             Math.sqrt(this.resolution * (2 * this.radius - this.resolution))
         );
 
-        const resolutionPositionAngle = Vector.angle({
+        const firstPositionAngle = Vector.angle({
             v1: new Vector<2>(0, 0),
-            v2: resolutionPosition,
+            v2: firstPosition,
             center: new Vector<2>(this.radius, 0),
             isClockWise: true,
         });
 
-        this.totalPoints = Math.abs(Math.floor(this.angle / resolutionPositionAngle));
+        this.totalPositions = Math.abs(Math.floor(this.angle / firstPositionAngle));
 
-        this.angleResolution = this.angle / this.totalPoints;
+        this.angleResolution = this.angle / this.totalPositions;
     }
 
-    public getPointPosition = (pointIndex: number) => {
-        const segmentCos = Math.cos(pointIndex * this.angleResolution);
-        const segmentSin = Math.sin(pointIndex * this.angleResolution);
+    public getPosition = (positionIndex: number) => {
+        const segmentCos = Math.cos(positionIndex * this.angleResolution);
+        const segmentSin = Math.sin(positionIndex * this.angleResolution);
 
         const centerToInitialPosition = Vector.subtract(this.initialPosition, this.centerPosition);
 

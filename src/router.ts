@@ -1,7 +1,10 @@
+import express from "express";
 import { Controller } from "./controller";
 import { GCode } from "./gcode";
 
 export class Router {
+    public config: express.Router;
+
     private controller: Controller;
     private commandHandler: Router.CommandHandler;
 
@@ -17,6 +20,11 @@ export class Router {
             [GCode.Command.M00]: this.controller.pause,
             [GCode.Command.M99]: this.controller.resume,
         };
+
+        this.config = express.Router();
+
+        this.config.get("/", this.controller.getConfig);
+        this.config.patch("/", this.controller.updateConfig);
     }
 
     public handleMessage = (message: string): string => {

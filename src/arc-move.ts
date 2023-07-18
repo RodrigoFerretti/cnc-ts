@@ -16,7 +16,7 @@ export class ArcMove extends Move {
         this.arc = options.arc;
         this.coordinate = options.coordinate;
         this.currentPoint = 0;
-        this.timeBetweenPoints = this.arc.perimeter / this.speed / this.arc.totalPoints;
+        this.timeBetweenPoints = this.arc.perimeter / this.speed / this.arc.totalPositions;
 
         this.homeSensor.on(Sensor.Event.Trigger, this.break);
         this.limitSensor.on(Sensor.Event.Trigger, this.break);
@@ -25,9 +25,9 @@ export class ArcMove extends Move {
     }
 
     private moveToNextPoint = () => {
-        if (this.currentPoint === this.arc.totalPoints + 1) return this.finish();
+        if (this.currentPoint === this.arc.totalPositions + 1) return this.finish();
 
-        const pointPosition = this.arc.getPointPosition(this.currentPoint);
+        const pointPosition = this.arc.getPosition(this.currentPoint);
         const position = Math.round(pointPosition[this.coordinate]);
         const speed = Math.abs(position - this.stepper.position) / this.timeBetweenPoints;
 

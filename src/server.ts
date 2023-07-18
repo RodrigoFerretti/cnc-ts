@@ -16,6 +16,8 @@ export class Server {
 
         this.app.use(express.json());
 
+        this.app.use("/config", router.config);
+
         this.wss.app.ws("/", (webSocket) => {
             webSocket.send("connected");
 
@@ -26,7 +28,7 @@ export class Server {
                 webSocket.send(responseMessage);
             });
 
-            broker.on("message", (message) => {
+            broker.on(Broker.Event.Message, (message) => {
                 webSocket.send(message);
             });
         });

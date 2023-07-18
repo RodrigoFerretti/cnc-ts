@@ -43,6 +43,7 @@ export namespace GCode {
             x: stringNumber.optional(),
             y: stringNumber.optional(),
             z: stringNumber.optional(),
+            f: z.undefined(),
         })
         .strict()
         .superRefine(refinePosition);
@@ -135,7 +136,7 @@ export namespace GCode {
         [Command.M99]: resumeSchema,
     } satisfies Record<Command, z.ZodSchema>;
 
-    export type GCode = z.infer<z.ZodUnion<[typeof schema[keyof typeof schema]]>>;
+    export type GCode = z.infer<z.ZodUnion<[(typeof schema)[keyof typeof schema]]>>;
 
     const matchCommand = (message: string) => {
         const match = message.match(commandRegex);

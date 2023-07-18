@@ -7,11 +7,17 @@ export class Broker {
         this.eventEmitter = new EventEmitter();
     }
 
-    public on = (eventName: "message", listener: (message: string) => void) => {
+    public on = <T extends Broker.Event>(eventName: T, listener: (message: string) => void) => {
         this.eventEmitter.on(eventName, listener);
     };
 
-    public emit = (eventName: "message", message: string) => {
+    public emit = <T extends Broker.Event>(eventName: T, message: string) => {
         this.eventEmitter.emit(eventName, message);
     };
+}
+
+export namespace Broker {
+    export enum Event {
+        Message = "message",
+    }
 }

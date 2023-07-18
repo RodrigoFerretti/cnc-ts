@@ -91,7 +91,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = "f" in gCode && gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -247,7 +247,7 @@ export class Service {
             this.moves = [];
             this.status = Service.Status.Idle;
 
-            this.broker.emit("message", this.status);
+            this.broker.emit(Broker.Event.Message, this.status);
         }
 
         if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
@@ -255,7 +255,7 @@ export class Service {
             this.moves = [];
             this.status = Service.Status.SensorTriggered;
 
-            this.broker.emit("message", this.status);
+            this.broker.emit(Broker.Event.Message, this.status);
         }
 
         const currentPosition = new Vector<3>(

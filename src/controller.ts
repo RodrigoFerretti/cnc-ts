@@ -1,10 +1,15 @@
+import { RequestHandler } from "express";
+import { z } from "zod";
+import { Config } from "./config";
 import { GCode } from "./gcode";
 import { Service } from "./service";
 
 export class Controller {
+    private config: Config;
     private service: Service;
 
     constructor(options: Controller.Options) {
+        this.config = options.config;
         this.service = options.service;
     }
 
@@ -61,12 +66,45 @@ export class Controller {
 
         return this.service.getStatus();
     };
+
+    public getConfig: RequestHandler = (_req, res) => res.json(this.config.getData());
+
+    public updateConfig: UpdateConfigController.ReqHandler = (req, res) => {
+        const validationResult = UpdateConfigController.reqBodySchema.strict().safeParse(req.body);
+        if (validationResult.success === false) {
+            return res.status(400).json({ message: "Validation error", errors: validationResult.error.issues });
+        }
+
+        this.config.setData({ ...this.config.getData(), ...validationResult.data });
+
+        return res.json(this.config.getData());
+    };
 }
 
 export namespace Controller {
     export type Options = {
+        config: Config;
         service: Service;
     };
 
+    export type ResError = {
+        message: string;
+        errors: z.ZodIssue[];
+    };
+
     export type Handler<G extends GCode = any> = (gCode: G) => string;
+}
+
+export namespace UpdateConfigController {
+    export type ReqBody = z.infer<typeof reqBodySchema>;
+
+    export type ResBody = Config.Data | Controller.ResError;
+
+    export type ReqHandler = RequestHandler<never, ResBody, ReqBody>;
+
+    export const reqBodySchema = z.object(
+        Object.entries(Config.dataSchema.shape).reduce((result, [key, value]) => {
+            return { ...result, [key]: value.optional() };
+        }, {} as Record<Config.Keys, z.ZodOptional<z.ZodNumber>>)
+    );
 }
