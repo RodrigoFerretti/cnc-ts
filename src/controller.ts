@@ -67,7 +67,7 @@ export class Controller {
         return this.service.getStatus();
     };
 
-    public getConfig: RequestHandler = (_req, res) => res.json(this.config.getData());
+    public getConfig: RequestHandler = (_req, res) => res.json(this.config.data);
 
     public updateConfig: UpdateConfigController.ReqHandler = (req, res) => {
         const validationResult = UpdateConfigController.reqBodySchema.strict().safeParse(req.body);
@@ -75,9 +75,9 @@ export class Controller {
             return res.status(400).json({ message: "Validation error", errors: validationResult.error.issues });
         }
 
-        this.config.setData({ ...this.config.getData(), ...validationResult.data });
+        this.config.data = { ...this.config.data, ...validationResult.data };
 
-        return res.json(this.config.getData());
+        return res.json(this.config.data);
     };
 }
 
@@ -105,6 +105,6 @@ export namespace UpdateConfigController {
     export const reqBodySchema = z.object(
         Object.entries(Config.dataSchema.shape).reduce((result, [key, value]) => {
             return { ...result, [key]: value.optional() };
-        }, {} as Record<Config.Keys, z.ZodOptional<z.ZodNumber>>)
+        }, {} as Record<Config.Name, z.ZodOptional<z.ZodNumber>>)
     );
 }
