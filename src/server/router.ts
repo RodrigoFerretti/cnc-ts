@@ -24,7 +24,7 @@ export class Router {
         this.config = express.Router();
 
         this.config.get("/", this.controller.getConfig);
-        this.config.patch("/", this.controller.updateConfig);
+        this.config.put("/", this.controller.putConfig);
     }
 
     public handleMessage = (message: string): string => {

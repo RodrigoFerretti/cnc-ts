@@ -69,8 +69,8 @@ export class Controller {
 
     public getConfig: RequestHandler = (_req, res) => res.json(this.config.data);
 
-    public updateConfig: UpdateConfigController.ReqHandler = (req, res) => {
-        const validationResult = UpdateConfigController.reqBodySchema.strict().safeParse(req.body);
+    public putConfig: RequestHandler = (req, res) => {
+        const validationResult = Config.dataSchema.safeParse(req.body);
         if (validationResult.success === false) {
             return res.status(400).json({ message: "Validation error", errors: validationResult.error.issues });
         }
@@ -93,18 +93,4 @@ export namespace Controller {
     };
 
     export type Handler<G extends GCode = any> = (gCode: G) => string;
-}
-
-export namespace UpdateConfigController {
-    export type ReqBody = z.infer<typeof reqBodySchema>;
-
-    export type ResBody = Config.Data | Controller.ResError;
-
-    export type ReqHandler = RequestHandler<never, ResBody, ReqBody>;
-
-    export const reqBodySchema = z.object(
-        Object.entries(Config.dataSchema.shape).reduce((result, [key, value]) => {
-            return { ...result, [key]: value.optional() };
-        }, {} as Record<Config.Name, z.ZodOptional<z.ZodNumber>>)
-    );
 }

@@ -1,12 +1,12 @@
-import { Broker } from "./broker";
-import { Config } from "./config";
-import { Controller } from "./controller";
-import { Gpio } from "./gpio";
-import { Router } from "./router";
-import { Sensor } from "./sensor";
-import { Server } from "./server";
-import { Service } from "./service";
-import { Stepper } from "./stepper";
+import { Broker } from "./server/broker";
+import { Config } from "./server/config";
+import { Controller } from "./server/controller";
+import { Gpio } from "./io/gpio";
+import { Router } from "./server/router";
+import { Sensor } from "./io/sensor";
+import { Server } from "./server/server";
+import { Service } from "./server/service";
+import { Stepper } from "./io/stepper";
 
 const config = new Config({ relativePath: "../config.json" });
 

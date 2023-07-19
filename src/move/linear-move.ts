@@ -1,6 +1,6 @@
 import { Move } from "./move";
-import { Sensor } from "./sensor";
-import { Stepper } from "./stepper";
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
 
 export class LinearMove extends Move {
     public constructor(options: LinearMove.Options) {

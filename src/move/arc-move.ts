@@ -1,8 +1,8 @@
-import { Arc } from "./arc";
-import { Coordinate } from "./coodinate";
+import { Arc } from "../math/arc";
+import { Coordinate } from "../math/coodinate";
 import { Move } from "./move";
-import { Sensor } from "./sensor";
-import { Stepper } from "./stepper";
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
 
 export class ArcMove extends Move {
     private arc: Arc;

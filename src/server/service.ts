@@ -1,14 +1,14 @@
-import { Arc } from "./arc";
-import { ArcMove } from "./arc-move";
+import { Arc } from "../math/arc";
+import { ArcMove } from "../move/arc-move";
 import { Broker } from "./broker";
-import { Coordinate } from "./coodinate";
+import { Coordinate } from "../math/coodinate";
 import { GCode } from "./gcode";
-import { Home } from "./home";
-import { LinearMove } from "./linear-move";
-import { Move } from "./move";
-import { Sensor } from "./sensor";
-import { Stepper } from "./stepper";
-import { Vector } from "./vector";
+import { Home } from "../move/home";
+import { LinearMove } from "../move/linear-move";
+import { Move } from "../move/move";
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
+import { Vector } from "../math/vector";
 
 export class Service {
     private axes: Service.Axes;

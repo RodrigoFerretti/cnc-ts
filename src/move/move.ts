@@ -1,6 +1,6 @@
 import NanoTimer from "nanotimer";
-import { Sensor } from "./sensor";
-import { Stepper } from "./stepper";
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
 
 export abstract class Move {
     protected speed: number;

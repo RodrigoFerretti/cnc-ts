@@ -71,10 +71,12 @@ export namespace Config {
 
     export type Data = z.infer<typeof dataSchema>;
 
-    export const dataSchema = z.object(
-        Object.values(Config.Name).reduce(
-            (result, configName) => ({ ...result, [configName]: z.number().int().nonnegative() }),
-            {} as Record<Config.Name, z.ZodNumber>
+    export const dataSchema = z
+        .object(
+            Object.values(Config.Name).reduce(
+                (result, configName) => ({ ...result, [configName]: z.number().int().nonnegative() }),
+                {} as Record<Config.Name, z.ZodNumber>
+            )
         )
-    );
+        .strict();
 }
