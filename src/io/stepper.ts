@@ -70,10 +70,10 @@ export class Stepper {
         this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
 
         this.remainingPulses--;
-        this.currentPosition =
-            this.pulse === Stepper.Pulse.On
-                ? this.currentPosition + (this.direction === Stepper.Direction.Forwards ? 1 : -1)
-                : this.currentPosition;
+
+        if (this.pulse === Stepper.Pulse.Off) return;
+        if (this.direction === Stepper.Direction.Forwards) return void this.currentPosition++;
+        if (this.direction === Stepper.Direction.Backwards) return void this.currentPosition--;
     };
 
     private finish = () => {

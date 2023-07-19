@@ -7,32 +7,32 @@ import { Stepper } from "../io/stepper";
 export class ArcMove extends Move {
     private arc: Arc;
     private coordinate: Coordinate.X | Coordinate.Y;
-    private currentPoint: number;
-    private timeBetweenPoints: number;
+    private currentPosition: number;
+    private timeBetweenPositions: number;
 
     public constructor(options: ArcMove.Options) {
         super(options);
 
         this.arc = options.arc;
         this.coordinate = options.coordinate;
-        this.currentPoint = 0;
-        this.timeBetweenPoints = this.arc.perimeter / this.speed / this.arc.totalPositions;
+        this.currentPosition = 0;
+        this.timeBetweenPositions = this.arc.perimeter / this.speed / this.arc.totalPositions;
 
         this.homeSensor.on(Sensor.Event.Trigger, this.break);
         this.limitSensor.on(Sensor.Event.Trigger, this.break);
 
-        this.nanoTimer.setInterval(this.moveToNextPoint, "", `${this.timeBetweenPoints * 1e6}u`);
+        this.nanoTimer.setInterval(this.moveToNextPosition, "", `${this.timeBetweenPositions * 1e6}u`);
     }
 
-    private moveToNextPoint = () => {
-        if (this.currentPoint === this.arc.totalPositions + 1) return this.finish();
+    private moveToNextPosition = () => {
+        if (this.currentPosition === this.arc.totalPositions + 1) return this.finish();
 
-        const pointPosition = this.arc.getPosition(this.currentPoint);
-        const position = Math.round(pointPosition[this.coordinate]);
-        const speed = Math.abs(position - this.stepper.position) / this.timeBetweenPoints;
+        const position = this.arc.getPosition(this.currentPosition);
+        const coordinatePosition = Math.round(position[this.coordinate]);
+        const speed = Math.abs(coordinatePosition - this.stepper.position) / this.timeBetweenPositions;
 
-        this.stepper.move({ position, speed });
-        this.currentPoint++;
+        this.stepper.move({ position: coordinatePosition, speed });
+        this.currentPosition++;
     };
 }
 
