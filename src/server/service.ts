@@ -13,25 +13,29 @@ import { Vector } from "../math/vector";
 export class Service {
     private axes: Service.Axes;
     private moves: Move[];
-    private status: Service.Status;
     private broker: Broker;
+    private _status: Service.Status;
 
     constructor(options: Service.Options) {
         this.axes = options.axes;
         this.moves = [];
-        this.status = Service.Status.Idle;
-        this.resume = this.setResume(this.status);
         this.broker = options.broker;
+        this._status = Service.Status.Idle;
+        this.resume = this.setResume(this._status);
 
         setInterval(this.loop);
     }
 
-    private getSteppersMaxSpeed = () => Math.min(...Object.values(this.axes).map((axis) => axis.stepper.getMaxSpeed()));
+    public get status() {
+        return this._status;
+    }
 
-    public getStatus = () => this.status;
+    private get stepperMaxSpeed() {
+        return Math.min(...Object.values(this.axes).map((axis) => axis.stepper.getMaxSpeed()));
+    }
 
     public home = () => {
-        this.status = Service.Status.Homing;
+        this._status = Service.Status.Homing;
 
         this.moves = [
             new Home({
@@ -76,7 +80,7 @@ export class Service {
     };
 
     public linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
-        this.status = Service.Status.LinearMoving;
+        this._status = Service.Status.LinearMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -91,7 +95,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.stepperMaxSpeed;
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -143,7 +147,7 @@ export class Service {
     };
 
     public arcMove = (gCode: GCode.ArcMove) => {
-        this.status = Service.Status.ArcMoving;
+        this._status = Service.Status.ArcMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -172,7 +176,7 @@ export class Service {
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.getSteppersMaxSpeed();
+        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.stepperMaxSpeed;
         const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
@@ -227,14 +231,14 @@ export class Service {
     };
 
     public pause = () => {
-        const resumeStatus = this.status;
-        this.status = Service.Status.Paused;
+        const resumeStatus = this._status;
+        this._status = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
         Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.stop(), undefined);
     };
 
     private setResume = (status: Service.Status) => () => {
-        this.status = status;
+        this._status = status;
         Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.resume(), undefined);
     };
 
@@ -245,17 +249,17 @@ export class Service {
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
-            this.status = Service.Status.Idle;
+            this._status = Service.Status.Idle;
 
-            this.broker.emit(Broker.Event.Message, this.status);
+            this.broker.emit(Broker.Event.SocketMessage, this._status);
         }
 
         if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
             this.moves.reduce<void>((_, move) => move.break(), undefined);
             this.moves = [];
-            this.status = Service.Status.SensorTriggered;
+            this._status = Service.Status.SensorTriggered;
 
-            this.broker.emit(Broker.Event.Message, this.status);
+            this.broker.emit(Broker.Event.SocketMessage, this._status);
         }
 
         const currentPosition = new Vector<3>(
@@ -264,7 +268,7 @@ export class Service {
             this.axes.z.stepper.position
         );
 
-        if (this.status !== Service.Status.Idle) {
+        if (this._status !== Service.Status.Idle) {
             console.log("message", `X${currentPosition.x} Y${currentPosition.y} Z${currentPosition.z}`);
         }
     };
@@ -299,4 +303,6 @@ export namespace Service {
     export type SlaveAxis = {
         coordinate: Coordinate;
     } & Axis;
+
+    export type Handler<T extends GCode = any> = (gCode: T) => void;
 }

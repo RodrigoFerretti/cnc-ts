@@ -18,6 +18,6 @@ export class Broker {
 
 export namespace Broker {
     export enum Event {
-        Message = "message",
+        SocketMessage = "socket-message",
     }
 }

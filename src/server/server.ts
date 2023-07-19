@@ -1,41 +1,42 @@
 import express, { Express } from "express";
-import expressws, { Instance } from "express-ws";
+import expressws, { Instance, WebsocketRequestHandler } from "express-ws";
 import { Broker } from "./broker";
 import { Router } from "./router";
 
 export class Server {
     private app: Express;
     private wss: Instance;
+    private router: Router;
+    private broker: Broker;
 
     public constructor(options: Server.Options) {
-        const router = options.router;
-        const broker = options.broker;
-
         this.app = express();
         this.wss = expressws(this.app);
+        this.router = options.router;
+        this.broker = options.broker;
 
         this.app.use(express.json());
-
-        this.app.use("/config", router.config);
-
-        this.wss.app.ws("/", (webSocket) => {
-            webSocket.send("connected");
-
-            webSocket.on("message", (data) => {
-                const requestMessage = data.toString();
-                const responseMessage = router.handleMessage(requestMessage);
-
-                webSocket.send(responseMessage);
-            });
-
-            broker.on(Broker.Event.Message, (message) => {
-                webSocket.send(message);
-            });
-        });
+        this.app.use("/config", this.router.configRouter);
+        this.wss.app.ws("/", this.webSocketHandler);
     }
 
-    public start = (port: number) => {
-        this.app.listen(8080, () => console.log("Server running on port 8080"));
+    private webSocketHandler: WebsocketRequestHandler = (webSocket) => {
+        webSocket.send("connected");
+
+        webSocket.on("message", (data) => {
+            const reqMessage = data.toString();
+            const resMessage = this.router.controller.handleSocketMessage(reqMessage);
+
+            webSocket.send(resMessage);
+        });
+
+        this.broker.on(Broker.Event.SocketMessage, (message) => {
+            webSocket.send(message);
+        });
+    };
+
+    public start = (port: number = 8080) => {
+        this.app.listen(port, () => console.log(`Server running on port ${port}`));
     };
 }
 
