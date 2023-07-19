@@ -95,7 +95,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.stepperMaxSpeed;
+        const speedMagnitude = gCode.f || this.stepperMaxSpeed;
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -169,14 +169,14 @@ export class Service {
         const arcZ = gCode.i === undefined ? Coordinate.X : gCode.j === undefined ? Coordinate.Y : Coordinate.Z;
 
         const arc = new Arc({
-            resolution: 1,
+            resolution: 0.01,
             isClockWise: gCode.command === GCode.Command.G02,
             finalPosition: new Vector<2>(finalPosition[arcX], finalPosition[arcY]),
             centerPosition: new Vector<2>(centerPosition[arcX], centerPosition[arcY]),
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
-        const speedMagnitude = gCode.f !== undefined ? gCode.f : this.stepperMaxSpeed;
+        const speedMagnitude = gCode.f || this.stepperMaxSpeed;
         const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
