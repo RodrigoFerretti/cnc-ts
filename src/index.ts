@@ -1,14 +1,12 @@
-import { Broker } from "./server/broker";
 import { Config } from "./server/config";
 import { Controller } from "./server/controller";
 import { Gpio } from "./io/gpio";
-import { Router } from "./server/router";
 import { Sensor } from "./io/sensor";
 import { Server } from "./server/server";
 import { Service } from "./server/service";
 import { Stepper } from "./io/stepper";
 
-const config = new Config({ relativePath: "../config.json" });
+const config = new Config({ path: "./config.json" });
 
 const stepperX = new Stepper({
     directionPin: new Gpio(config.data[Config.Name.XAxisStepperDirectionPin], "out"),
@@ -67,10 +65,8 @@ const axes: Service.Axes = {
     z: { stepper: stepperZ, homeSensor: homeSensorZ, limitSensor: limitSensorZ },
 };
 
-const broker = new Broker();
-const service = new Service({ broker, axes });
+const service = new Service({ axes });
 const controller = new Controller({ config, service });
-const router = new Router({ controller });
-const server = new Server({ router, broker });
+const server = new Server({ controller });
 
 server.start(8080);

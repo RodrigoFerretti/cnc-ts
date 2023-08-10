@@ -1,29 +1,38 @@
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
 import { Arc } from "../math/arc";
-import { ArcMove } from "../move/arc-move";
-import { Broker } from "./broker";
 import { Coordinate } from "../math/coodinate";
-import { GCode } from "./gcode";
+import { Vector } from "../math/vector";
+import { ArcMove } from "../move/arc-move";
 import { Home } from "../move/home";
 import { LinearMove } from "../move/linear-move";
 import { Move } from "../move/move";
-import { Sensor } from "../io/sensor";
-import { Stepper } from "../io/stepper";
-import { Vector } from "../math/vector";
+import { GCode } from "./gcode";
 
 export class Service {
+    public gcode: Record<GCode.Command, Service.Handler>;
+
     private axes: Service.Axes;
     private moves: Move[];
-    private broker: Broker;
     private _status: Service.Status;
 
     constructor(options: Service.Options) {
         this.axes = options.axes;
         this.moves = [];
-        this.broker = options.broker;
         this._status = Service.Status.Idle;
         this.resume = this.setResume(this._status);
 
         setInterval(this.loop);
+
+        this.gcode = {
+            [GCode.Command.G00]: this.linearMove,
+            [GCode.Command.G01]: this.linearMove,
+            [GCode.Command.G02]: this.arcMove,
+            [GCode.Command.G03]: this.arcMove,
+            [GCode.Command.G28]: this.home,
+            [GCode.Command.M00]: this.pause,
+            [GCode.Command.M99]: this.resume,
+        };
     }
 
     public get status() {
@@ -34,7 +43,7 @@ export class Service {
         return Math.min(...Object.values(this.axes).map((axis) => axis.stepper.getMaxSpeed()));
     }
 
-    public home = () => {
+    private home = () => {
         this._status = Service.Status.Homing;
 
         this.moves = [
@@ -79,7 +88,7 @@ export class Service {
         ];
     };
 
-    public linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
+    private linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
         this._status = Service.Status.LinearMoving;
 
         const currentPosition = new Vector<3>(
@@ -146,7 +155,7 @@ export class Service {
         ];
     };
 
-    public arcMove = (gCode: GCode.ArcMove) => {
+    private arcMove = (gCode: GCode.ArcMove) => {
         this._status = Service.Status.ArcMoving;
 
         const currentPosition = new Vector<3>(
@@ -230,7 +239,7 @@ export class Service {
         ];
     };
 
-    public pause = () => {
+    private pause = () => {
         const resumeStatus = this._status;
         this._status = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
@@ -242,7 +251,7 @@ export class Service {
         Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.resume(), undefined);
     };
 
-    public resume: () => void;
+    private resume: () => void;
 
     private loop = () => {
         const movesStatus = this.moves.map((move) => move.status);
@@ -250,16 +259,12 @@ export class Service {
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
             this._status = Service.Status.Idle;
-
-            this.broker.emit(Broker.Event.SocketMessage, this._status);
         }
 
         if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
             this.moves.reduce<void>((_, move) => move.break(), undefined);
             this.moves = [];
             this._status = Service.Status.SensorTriggered;
-
-            this.broker.emit(Broker.Event.SocketMessage, this._status);
         }
 
         const currentPosition = new Vector<3>(
@@ -287,7 +292,6 @@ export namespace Service {
 
     export type Options = {
         axes: Axes;
-        broker: Broker;
     };
 
     export type Axes = {

@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { z } from "zod";
 
 export class Config {
@@ -7,7 +6,7 @@ export class Config {
     private filePath: string;
 
     constructor(options: Config.Options) {
-        this.filePath = path.resolve(__dirname, options.relativePath);
+        this.filePath = options.path;
         this._data = this.readData();
     }
 
@@ -36,7 +35,7 @@ export class Config {
 
 export namespace Config {
     export type Options = {
-        relativePath: string;
+        path: string;
     };
 
     export enum Name {
