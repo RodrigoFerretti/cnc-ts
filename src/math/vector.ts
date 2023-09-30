@@ -44,7 +44,7 @@ export namespace Vector {
 
         const angle = Math.atan2(
             Vector.crossProduct(centerToV1, centerToV2),
-            Vector.dotProduct(centerToV1, centerToV2)
+            Vector.dotProduct(centerToV1, centerToV2),
         );
 
         if (options.isClockWise && angle >= 0) return angle - 2 * Math.PI;

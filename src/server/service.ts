@@ -94,13 +94,13 @@ export class Service {
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
             this.axes.y.stepper.position,
-            this.axes.z.stepper.position
+            this.axes.z.stepper.position,
         );
 
         const finalPosition = new Vector<3>(
             gCode.x !== undefined ? gCode.x : currentPosition.x,
             gCode.y !== undefined ? gCode.y : currentPosition.y,
-            gCode.z !== undefined ? gCode.z : currentPosition.z
+            gCode.z !== undefined ? gCode.z : currentPosition.z,
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
@@ -112,7 +112,7 @@ export class Service {
         const speed = new Vector<3>(
             Math.abs(distance.x / time),
             Math.abs(distance.y / time),
-            Math.abs(distance.z / time)
+            Math.abs(distance.z / time),
         );
 
         this.moves = [
@@ -161,7 +161,7 @@ export class Service {
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
             this.axes.y.stepper.position,
-            this.axes.z.stepper.position
+            this.axes.z.stepper.position,
         );
 
         const centerOffset = new Vector<3>(gCode.i || 0, gCode.j || 0, gCode.k || 0);
@@ -170,7 +170,7 @@ export class Service {
         const finalPosition = new Vector<3>(
             gCode.x !== undefined ? gCode.x : currentPosition.x,
             gCode.y !== undefined ? gCode.y : currentPosition.y,
-            gCode.z !== undefined ? gCode.z : currentPosition.z
+            gCode.z !== undefined ? gCode.z : currentPosition.z,
         );
 
         const arcX = gCode.i !== undefined ? Coordinate.X : Coordinate.Y;
@@ -270,7 +270,7 @@ export class Service {
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
             this.axes.y.stepper.position,
-            this.axes.z.stepper.position
+            this.axes.z.stepper.position,
         );
 
         if (this._status !== Service.Status.Idle) {

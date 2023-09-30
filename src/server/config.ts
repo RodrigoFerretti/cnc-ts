@@ -74,8 +74,8 @@ export namespace Config {
         .object(
             Object.values(Config.Name).reduce(
                 (result, configName) => ({ ...result, [configName]: z.number().int().nonnegative() }),
-                {} as Record<Config.Name, z.ZodNumber>
-            )
+                {} as Record<Config.Name, z.ZodNumber>,
+            ),
         )
         .strict();
 }

@@ -31,7 +31,7 @@ export class Arc {
 
         const firstPosition = new Vector<2>(
             this.resolution,
-            Math.sqrt(this.resolution * (2 * this.radius - this.resolution))
+            Math.sqrt(this.resolution * (2 * this.radius - this.resolution)),
         );
 
         const firstPositionAngle = Vector.angle({
@@ -54,7 +54,7 @@ export class Arc {
 
         const position = new Vector<2>(
             this.centerPosition.x + (centerToInitialPosition.x * segmentCos - centerToInitialPosition.y * segmentSin),
-            this.centerPosition.y + (centerToInitialPosition.x * segmentSin + centerToInitialPosition.y * segmentCos)
+            this.centerPosition.y + (centerToInitialPosition.x * segmentSin + centerToInitialPosition.y * segmentCos),
         );
 
         return position;
