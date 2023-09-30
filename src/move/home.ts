@@ -21,18 +21,34 @@ export class Home extends Move {
     }
 
     private loop = () => {
-        if (this.stage === Home.Stage.NotStarted) return this.startStageA();
-        if (this.stage === Home.Stage.ACompleted) return this.startStageB();
-        if (this.stage === Home.Stage.BCompleted) return this.startStageC();
+        if (this.stage === Home.Stage.NotStarted) {
+            return this.startStageA();
+        }
+
+        if (this.stage === Home.Stage.ACompleted) {
+            return this.startStageB();
+        }
+
+        if (this.stage === Home.Stage.BCompleted) {
+            return this.startStageC();
+        }
     };
 
     private onStepperMoveFinish = () => {
-        if (this.stage === Home.Stage.BInProcess) return this.finishStageB();
+        if (this.stage === Home.Stage.BInProcess) {
+            return this.finishStageB();
+        }
     };
 
     private onHomeSensorTrigger = () => {
-        if (this.stage === Home.Stage.AInProcess) return this.finishStageA();
-        if (this.stage === Home.Stage.CInProcess) return this.finishStageC();
+        if (this.stage === Home.Stage.AInProcess) {
+            return this.finishStageA();
+        }
+
+        if (this.stage === Home.Stage.CInProcess) {
+            return this.finishStageC();
+        }
+
         this.break();
     };
 

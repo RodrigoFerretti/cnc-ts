@@ -155,7 +155,9 @@ export namespace GCode {
 
     export const parse = (message: string): GCode | null => {
         const command = matchCommand(message);
-        if (command === null) return null;
+        if (command === null) {
+            return null;
+        }
 
         const parameters = matchParameters(command, message);
         const gCode = validate(command, parameters);

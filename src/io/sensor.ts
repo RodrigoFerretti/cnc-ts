@@ -15,7 +15,12 @@ export class Sensor {
         setInterval(this.read);
     }
 
-    private read = () => this.debouncer.debounce(this.pin.readSync()) && this.emit(Sensor.Event.Trigger);
+    private read = () => {
+        const reading = this.debouncer.debounce(this.pin.readSync());
+        if (reading) {
+            this.emit(Sensor.Event.Trigger);
+        }
+    };
 
     private emit = <T extends Sensor.Event>(eventName: T) => {
         this.eventEmitter.emit(eventName);

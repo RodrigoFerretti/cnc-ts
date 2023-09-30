@@ -25,7 +25,9 @@ export class ArcMove extends Move {
     }
 
     private moveToNextPosition = () => {
-        if (this.currentPosition === this.arc.totalPositions + 1) return this.finish();
+        if (this.currentPosition === this.arc.totalPositions + 1) {
+            return this.finish();
+        }
 
         const position = this.arc.getPosition(this.currentPosition);
         const coordinatePosition = Math.round(position[this.coordinate]);

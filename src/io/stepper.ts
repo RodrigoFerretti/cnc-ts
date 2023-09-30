@@ -63,17 +63,30 @@ export class Stepper {
     };
 
     private step = () => {
-        if (this.enable === Stepper.Enable.Off) return;
-        if (this.remainingPulses === 0) return this.finish();
+        if (this.enable === Stepper.Enable.Off) {
+            return;
+        }
+
+        if (this.remainingPulses === 0) {
+            return this.finish();
+        }
 
         this.pulsePin.writeSync(this.pulse);
         this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
 
         this.remainingPulses--;
 
-        if (this.pulse === Stepper.Pulse.Off) return;
-        if (this.direction === Stepper.Direction.Forwards) return void this.currentPosition++;
-        if (this.direction === Stepper.Direction.Backwards) return void this.currentPosition--;
+        if (this.pulse === Stepper.Pulse.Off) {
+            return;
+        }
+
+        if (this.direction === Stepper.Direction.Forwards) {
+            return void this.currentPosition++;
+        }
+
+        if (this.direction === Stepper.Direction.Backwards) {
+            return void this.currentPosition--;
+        }
     };
 
     private finish = () => {

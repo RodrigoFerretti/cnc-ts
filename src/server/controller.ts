@@ -18,7 +18,9 @@ export class Controller {
             webSocket.send("Command Received");
 
             const gCode = GCode.parse(data.toString());
-            if (gCode === null) return webSocket.send("Invalid Command");
+            if (gCode === null) {
+                return webSocket.send("Invalid Command");
+            }
 
             this.service.gcode[gCode.command](gCode);
         });

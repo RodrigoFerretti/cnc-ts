@@ -73,10 +73,11 @@ export class Service {
             }),
         ];
 
-        if (this.axes.slave === undefined) return;
+        if (this.axes.slave === undefined) {
+            return;
+        }
 
-        this.moves = [
-            ...this.moves,
+        this.moves.push(
             new Home({
                 speed: this.axes.slave.stepper.getMaxSpeed(),
                 stepper: this.axes.slave.stepper,
@@ -85,7 +86,7 @@ export class Service {
                 retractSpeed: 100,
                 retractPosition: 100,
             }),
-        ];
+        );
     };
 
     private linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
@@ -139,12 +140,13 @@ export class Service {
             }),
         ];
 
-        if (this.axes.slave === undefined) return;
+        if (this.axes.slave === undefined) {
+            return;
+        }
 
         const slaveCoordinate = this.axes.slave.coordinate;
 
-        this.moves = [
-            ...this.moves,
+        this.moves.push(
             new LinearMove({
                 speed: speed[slaveCoordinate],
                 stepper: this.axes.slave.stepper,
@@ -152,7 +154,7 @@ export class Service {
                 homeSensor: this.axes.slave.homeSensor,
                 limitSensor: this.axes.slave.limitSensor,
             }),
-        ];
+        );
     };
 
     private arcMove = (gCode: GCode.ArcMove) => {
@@ -214,12 +216,13 @@ export class Service {
             }),
         ];
 
-        if (this.axes.slave === undefined) return;
+        if (this.axes.slave === undefined) {
+            return;
+        }
 
         const slaveCoordinate = this.axes.slave.coordinate;
 
-        this.moves = [
-            ...this.moves,
+        this.moves.push(
             slaveCoordinate === arcZ
                 ? new LinearMove({
                       speed: linearMoveSpeed,
@@ -236,7 +239,7 @@ export class Service {
                       homeSensor: this.axes.slave.homeSensor,
                       limitSensor: this.axes.slave.limitSensor,
                   }),
-        ];
+        );
     };
 
     private pause = () => {
