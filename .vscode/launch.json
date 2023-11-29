@@ -3,13 +3,7 @@
     "configurations": [
         {
             "name": "run server",
-            "command": "yarn ts-node-dev --respawn -r dotenv/config ./src/index.ts",
-            "request": "launch",
-            "type": "node-terminal"
-        },
-        {
-            "name": "run and debug current .ts file",
-            "command": "yarn ts-node-dev --respawn -r dotenv/config ${relativeFile}",
+            "command": "yarn ts-node-dev ./src/index.ts",
             "request": "launch",
             "type": "node-terminal"
         }

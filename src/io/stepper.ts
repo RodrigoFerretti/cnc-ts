@@ -9,7 +9,6 @@ export class Stepper {
     private pulsePin: Gpio;
     private direction: Stepper.Direction;
     private nanoTimer: NanoTimer;
-    private enablePin: Gpio;
     private eventEmitter: EventEmitter;
     private directionPin: Gpio;
     private currentPosition: number;
@@ -22,13 +21,10 @@ export class Stepper {
         this.pulsePin = options.pulsePin;
         this.direction = Stepper.Direction.Forwards;
         this.nanoTimer = new NanoTimer();
-        this.enablePin = options.enablePin;
         this.eventEmitter = new EventEmitter();
         this.directionPin = options.directionPin;
         this.currentPosition = 0;
         this.remainingPulses = 0;
-
-        this.enablePin.writeSync(this.enable);
     }
 
     public get position() {
@@ -46,14 +42,13 @@ export class Stepper {
         const steps = Math.abs(distance);
         const pulses = steps * 2;
         const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
-        const pulseDelay = (steps / options.speed / pulses) * 1e6 || 1;
+        const pulseDelay = 5e5 / options.speed || 1;
 
         this.nanoTimer.clearInterval();
 
         this.pulse = Stepper.Pulse.On;
         this.enable = Stepper.Enable.On;
         this.direction = direction;
-        this.enablePin.writeSync(this.enable);
         this.directionPin.writeSync(direction);
         this.remainingPulses = pulses;
 
@@ -97,12 +92,10 @@ export class Stepper {
 
     public stop = async () => {
         this.enable = Stepper.Enable.Off;
-        this.enablePin.writeSync(this.enable);
     };
 
     public resume = async () => {
         this.enable = Stepper.Enable.On;
-        this.enablePin.writeSync(this.enable);
     };
 
     public on = <T extends Stepper.Event>(eventName: T, listener: () => void) => {
@@ -138,7 +131,6 @@ export namespace Stepper {
     export type Options = {
         maxSpeed: number;
         pulsePin: Gpio;
-        enablePin: Gpio;
         directionPin: Gpio;
     };
 

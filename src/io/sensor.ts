@@ -1,23 +1,20 @@
 import { Gpio } from "onoff";
 import { EventEmitter } from "stream";
-import { Debouncer } from "./debouncer";
 
 export class Sensor {
     private pin: Gpio;
-    private debouncer: Debouncer;
     private eventEmitter: EventEmitter;
 
     constructor(options: Sensor.Options) {
         this.pin = options.pin;
-        this.debouncer = new Debouncer({ time: options.debounceTime });
         this.eventEmitter = new EventEmitter();
 
         setInterval(this.read);
     }
 
     private read = () => {
-        const reading = this.debouncer.debounce(this.pin.readSync());
-        if (reading) {
+        const reading = this.pin.readSync();
+        if (!reading) {
             this.emit(Sensor.Event.Trigger);
         }
     };
@@ -34,7 +31,6 @@ export class Sensor {
 export namespace Sensor {
     export type Options = {
         pin: Gpio;
-        debounceTime: number;
     };
 
     export enum Event {

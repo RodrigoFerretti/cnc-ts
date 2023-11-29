@@ -12,15 +12,13 @@ import { GCode } from "./gcode";
 export class Service {
     public gcode: Record<GCode.Command, Service.Handler>;
 
-    private axes: Service.Axes;
     private moves: Move[];
-    private _status: Service.Status;
+    private currentStatus: Service.Status;
 
-    constructor(options: Service.Options) {
-        this.axes = options.axes;
+    constructor(public axes: Service.Axes) {
         this.moves = [];
-        this._status = Service.Status.Idle;
-        this.resume = this.setResume(this._status);
+        this.currentStatus = Service.Status.Idle;
+        this.resume = this.setResume(this.currentStatus);
 
         setInterval(this.loop);
 
@@ -36,7 +34,7 @@ export class Service {
     }
 
     public get status() {
-        return this._status;
+        return this.currentStatus;
     }
 
     private get stepperMaxSpeed() {
@@ -44,32 +42,32 @@ export class Service {
     }
 
     private home = () => {
-        this._status = Service.Status.Homing;
+        this.currentStatus = Service.Status.Homing;
 
         this.moves = [
             new Home({
-                speed: this.axes.x.stepper.getMaxSpeed(),
+                speed: 2000,
                 stepper: this.axes.x.stepper,
                 homeSensor: this.axes.x.homeSensor,
                 limitSensor: this.axes.x.limitSensor,
-                retractSpeed: 100,
-                retractPosition: 100,
+                retractSpeed: 500,
+                retractPosition: 1000,
             }),
             new Home({
-                speed: this.axes.y.stepper.getMaxSpeed(),
+                speed: 2000,
                 stepper: this.axes.y.stepper,
                 homeSensor: this.axes.y.homeSensor,
                 limitSensor: this.axes.y.limitSensor,
-                retractSpeed: 100,
-                retractPosition: 100,
+                retractSpeed: 500,
+                retractPosition: 1000,
             }),
             new Home({
-                speed: this.axes.z.stepper.getMaxSpeed(),
+                speed: 2000,
                 stepper: this.axes.z.stepper,
                 homeSensor: this.axes.z.homeSensor,
                 limitSensor: this.axes.z.limitSensor,
-                retractSpeed: 100,
-                retractPosition: 100,
+                retractSpeed: 500,
+                retractPosition: 1000,
             }),
         ];
 
@@ -79,18 +77,18 @@ export class Service {
 
         this.moves.push(
             new Home({
-                speed: this.axes.slave.stepper.getMaxSpeed(),
+                speed: 2000,
                 stepper: this.axes.slave.stepper,
                 homeSensor: this.axes.slave.homeSensor,
                 limitSensor: this.axes.slave.limitSensor,
-                retractSpeed: 100,
-                retractPosition: 100,
+                retractSpeed: 500,
+                retractPosition: 1000,
             }),
         );
     };
 
     private linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
-        this._status = Service.Status.LinearMoving;
+        this.currentStatus = Service.Status.LinearMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -158,7 +156,7 @@ export class Service {
     };
 
     private arcMove = (gCode: GCode.ArcMove) => {
-        this._status = Service.Status.ArcMoving;
+        this.currentStatus = Service.Status.ArcMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -243,15 +241,15 @@ export class Service {
     };
 
     private pause = () => {
-        const resumeStatus = this._status;
-        this._status = Service.Status.Paused;
+        const resumeStatus = this.currentStatus;
+        this.currentStatus = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
-        Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.stop(), undefined);
+        Object.values(this.axes).forEach((axis) => axis.stepper.stop());
     };
 
     private setResume = (status: Service.Status) => () => {
-        this._status = status;
-        Object.values(this.axes).reduce<void>((_, axis) => axis.stepper.resume(), undefined);
+        this.currentStatus = status;
+        Object.values(this.axes).forEach((axis) => axis.stepper.resume());
     };
 
     private resume: () => void;
@@ -261,23 +259,13 @@ export class Service {
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
-            this._status = Service.Status.Idle;
+            this.currentStatus = Service.Status.Idle;
         }
 
         if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
-            this.moves.reduce<void>((_, move) => move.break(), undefined);
+            this.moves.forEach((move) => move.break());
             this.moves = [];
-            this._status = Service.Status.SensorTriggered;
-        }
-
-        const currentPosition = new Vector<3>(
-            this.axes.x.stepper.position,
-            this.axes.y.stepper.position,
-            this.axes.z.stepper.position,
-        );
-
-        if (this._status !== Service.Status.Idle) {
-            console.log("message", `X${currentPosition.x} Y${currentPosition.y} Z${currentPosition.z}`);
+            this.currentStatus = Service.Status.SensorTriggered;
         }
     };
 }

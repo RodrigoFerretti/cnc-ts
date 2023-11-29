@@ -48,8 +48,6 @@ export class Home extends Move {
         if (this.stage === Home.Stage.CInProcess) {
             return this.finishStageC();
         }
-
-        this.break();
     };
 
     private startStageA = () => {
@@ -64,7 +62,7 @@ export class Home extends Move {
     };
 
     private startStageB = () => {
-        this.stepper.move({ position: this.retractPosition, speed: this.retractSpeed });
+        this.stepper.move({ position: this.retractPosition, speed: this.speed });
         this.stage = Home.Stage.BInProcess;
     };
 

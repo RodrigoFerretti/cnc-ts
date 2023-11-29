@@ -31,9 +31,10 @@
         "target": "ESNext",
         "useUnknownInCatchVariables": true,
         "resolveJsonModule": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "declaration": true,
     },
     "include": [
         "./src"
-    ],
+    ]
 }

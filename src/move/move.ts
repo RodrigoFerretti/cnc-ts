@@ -5,14 +5,14 @@ import { Stepper } from "../io/stepper";
 export abstract class Move {
     protected speed: number;
     protected stepper: Stepper;
-    protected _status: Move.Status;
+    protected currentStatus: Move.Status;
     protected nanoTimer: NanoTimer;
     protected homeSensor: Sensor;
     protected limitSensor: Sensor;
 
     public constructor(options: Move.Options) {
         this.speed = options.speed;
-        this._status = Move.Status.Started;
+        this.currentStatus = Move.Status.Started;
         this.stepper = options.stepper;
         this.nanoTimer = new NanoTimer();
         this.homeSensor = options.homeSensor;
@@ -20,16 +20,16 @@ export abstract class Move {
     }
 
     public get status() {
-        return this._status;
+        return this.currentStatus;
     }
 
     protected finish = () => {
-        this._status = Move.Status.Finished;
+        this.currentStatus = Move.Status.Finished;
         this.nanoTimer.clearInterval();
     };
 
     public break = () => {
-        this._status = Move.Status.Broke;
+        this.currentStatus = Move.Status.Broke;
         this.stepper.stop();
         this.nanoTimer.clearInterval();
     };
