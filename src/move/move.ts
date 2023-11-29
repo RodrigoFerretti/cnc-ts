@@ -1,14 +1,14 @@
 import NanoTimer from "nanotimer";
-import { Sensor } from "../io/sensor";
 import { Stepper } from "../io/stepper";
+import { Sensor } from "../io/sensor";
 
 export abstract class Move {
     protected speed: number;
     protected stepper: Stepper;
     protected currentStatus: Move.Status;
     protected nanoTimer: NanoTimer;
-    protected homeSensor: Sensor;
-    protected limitSensor: Sensor;
+    protected homeSensor: Sensor[];
+    protected limitSensor: Sensor[];
 
     public constructor(options: Move.Options) {
         this.speed = options.speed;
@@ -23,15 +23,22 @@ export abstract class Move {
         return this.currentStatus;
     }
 
+    protected clean = () => {
+        this.nanoTimer.clearInterval();
+        this.stepper.removeAllListeners();
+        this.homeSensor.forEach((sensor) => sensor.removeAllListeners());
+        this.limitSensor.forEach((sensor) => sensor.removeAllListeners());
+    };
+
     protected finish = () => {
         this.currentStatus = Move.Status.Finished;
-        this.nanoTimer.clearInterval();
+        this.clean();
     };
 
     public break = () => {
         this.currentStatus = Move.Status.Broke;
         this.stepper.stop();
-        this.nanoTimer.clearInterval();
+        this.clean();
     };
 }
 
@@ -39,8 +46,8 @@ export namespace Move {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        homeSensor: Sensor;
-        limitSensor: Sensor;
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 
     export enum Status {

@@ -7,8 +7,8 @@ export class LinearMove extends Move {
         super(options);
 
         this.stepper.on(Stepper.Event.MoveFinish, this.finish);
-        this.homeSensor.on(Sensor.Event.Trigger, this.break);
-        this.limitSensor.on(Sensor.Event.Trigger, this.break);
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.break));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.break));
         this.stepper.move({ position: options.position, speed: this.speed });
     }
 }
@@ -18,7 +18,7 @@ export namespace LinearMove {
         speed: number;
         stepper: Stepper;
         position: number;
-        homeSensor: Sensor;
-        limitSensor: Sensor;
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 }

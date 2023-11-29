@@ -1,13 +1,13 @@
 import { Gpio } from "onoff";
 import { EventEmitter } from "stream";
 
-export class Sensor {
+export class Sensor extends EventEmitter {
     private pin: Gpio;
-    private eventEmitter: EventEmitter;
 
     constructor(options: Sensor.Options) {
+        super();
+
         this.pin = options.pin;
-        this.eventEmitter = new EventEmitter();
 
         setInterval(this.read);
     }
@@ -19,12 +19,12 @@ export class Sensor {
         }
     };
 
-    private emit = <T extends Sensor.Event>(eventName: T) => {
-        this.eventEmitter.emit(eventName);
+    public emit = <T extends Sensor.Event>(eventName: T) => {
+        return super.emit(eventName);
     };
 
     public on = <T extends Sensor.Event>(eventName: T, listener: () => void) => {
-        this.eventEmitter.on(eventName, listener);
+        return super.on(eventName, listener);
     };
 }
 

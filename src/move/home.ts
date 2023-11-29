@@ -11,12 +11,14 @@ export class Home extends Move {
         super(options);
 
         this.stage = Home.Stage.NotStarted;
+        this.homeSensor = options.homeSensor;
+        this.limitSensor = options.limitSensor;
         this.retractSpeed = options.retractSpeed;
         this.retractPosition = options.retractPosition;
 
         this.stepper.on(Stepper.Event.MoveFinish, this.onStepperMoveFinish);
-        this.homeSensor.on(Sensor.Event.Trigger, this.onHomeSensorTrigger);
-        this.limitSensor.on(Sensor.Event.Trigger, this.break);
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.onHomeSensorTrigger));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.break));
         this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
@@ -87,8 +89,8 @@ export namespace Home {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        homeSensor: Sensor;
-        limitSensor: Sensor;
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
         retractSpeed: number;
         retractPosition: number;
     };

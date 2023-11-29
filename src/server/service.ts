@@ -70,21 +70,6 @@ export class Service {
                 retractPosition: 1000,
             }),
         ];
-
-        if (this.axes.slave === undefined) {
-            return;
-        }
-
-        this.moves.push(
-            new Home({
-                speed: 2000,
-                stepper: this.axes.slave.stepper,
-                homeSensor: this.axes.slave.homeSensor,
-                limitSensor: this.axes.slave.limitSensor,
-                retractSpeed: 500,
-                retractPosition: 1000,
-            }),
-        );
     };
 
     private linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
@@ -103,7 +88,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = gCode.f || this.stepperMaxSpeed;
+        const speedMagnitude = gCode.f || this.stepperMaxSpeed / 2;
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -119,40 +104,24 @@ export class Service {
                 speed: speed.x,
                 stepper: this.axes.x.stepper,
                 position: finalPosition.x,
-                homeSensor: this.axes.x.homeSensor,
-                limitSensor: this.axes.x.limitSensor,
+                homeSensor: distance.x > 0 ? [] : this.axes.x.homeSensor,
+                limitSensor: distance.x > 0 ? this.axes.x.limitSensor : [],
             }),
             new LinearMove({
                 speed: speed.y,
                 stepper: this.axes.y.stepper,
                 position: finalPosition.y,
-                homeSensor: this.axes.y.homeSensor,
-                limitSensor: this.axes.y.limitSensor,
+                homeSensor: distance.y > 0 ? [] : this.axes.y.homeSensor,
+                limitSensor: distance.y > 0 ? this.axes.y.limitSensor : [],
             }),
             new LinearMove({
                 speed: speed.z,
                 stepper: this.axes.z.stepper,
                 position: finalPosition.z,
-                homeSensor: this.axes.z.homeSensor,
-                limitSensor: this.axes.z.limitSensor,
+                homeSensor: distance.z > 0 ? [] : this.axes.z.homeSensor,
+                limitSensor: distance.z > 0 ? this.axes.z.limitSensor : [],
             }),
         ];
-
-        if (this.axes.slave === undefined) {
-            return;
-        }
-
-        const slaveCoordinate = this.axes.slave.coordinate;
-
-        this.moves.push(
-            new LinearMove({
-                speed: speed[slaveCoordinate],
-                stepper: this.axes.slave.stepper,
-                position: finalPosition[slaveCoordinate],
-                homeSensor: this.axes.slave.homeSensor,
-                limitSensor: this.axes.slave.limitSensor,
-            }),
-        );
     };
 
     private arcMove = (gCode: GCode.ArcMove) => {
@@ -173,6 +142,8 @@ export class Service {
             gCode.z !== undefined ? gCode.z : currentPosition.z,
         );
 
+        const distance = Vector.subtract(finalPosition, currentPosition);
+
         const arcX = gCode.i !== undefined ? Coordinate.X : Coordinate.Y;
         const arcY = gCode.j !== undefined ? Coordinate.Y : Coordinate.Z;
         const arcZ = gCode.i === undefined ? Coordinate.X : gCode.j === undefined ? Coordinate.Y : Coordinate.Z;
@@ -185,7 +156,7 @@ export class Service {
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
-        const speedMagnitude = gCode.f || this.stepperMaxSpeed;
+        const speedMagnitude = gCode.f || this.stepperMaxSpeed / 2;
         const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
@@ -209,35 +180,10 @@ export class Service {
                 speed: linearMoveSpeed,
                 stepper: this.axes[arcZ].stepper,
                 position: finalPosition[arcZ],
-                homeSensor: this.axes[arcZ].homeSensor,
-                limitSensor: this.axes[arcZ].limitSensor,
+                homeSensor: distance[arcZ] > 0 ? [] : this.axes[arcZ].homeSensor,
+                limitSensor: distance[arcZ] > 0 ? this.axes[arcZ].limitSensor : [],
             }),
         ];
-
-        if (this.axes.slave === undefined) {
-            return;
-        }
-
-        const slaveCoordinate = this.axes.slave.coordinate;
-
-        this.moves.push(
-            slaveCoordinate === arcZ
-                ? new LinearMove({
-                      speed: linearMoveSpeed,
-                      stepper: this.axes.slave.stepper,
-                      position: finalPosition[slaveCoordinate],
-                      homeSensor: this.axes.slave.homeSensor,
-                      limitSensor: this.axes.slave.limitSensor,
-                  })
-                : new ArcMove({
-                      arc,
-                      speed: speedMagnitude,
-                      stepper: this.axes.slave.stepper,
-                      coordinate: slaveCoordinate === arcX ? Coordinate.X : Coordinate.Y,
-                      homeSensor: this.axes.slave.homeSensor,
-                      limitSensor: this.axes.slave.limitSensor,
-                  }),
-        );
     };
 
     private pause = () => {
@@ -285,19 +231,13 @@ export namespace Service {
         axes: Axes;
     };
 
-    export type Axes = {
-        slave?: SlaveAxis;
-    } & Record<Coordinate, Axis>;
+    export type Axes = Record<Coordinate, Axis>;
 
     export type Axis = {
         stepper: Stepper;
-        homeSensor: Sensor;
-        limitSensor: Sensor;
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
-
-    export type SlaveAxis = {
-        coordinate: Coordinate;
-    } & Axis;
 
     export type Handler<T extends GCode = any> = (gCode: T) => void;
 }

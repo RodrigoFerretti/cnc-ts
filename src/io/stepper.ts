@@ -2,26 +2,26 @@ import NanoTimer from "nanotimer";
 import { Gpio } from "onoff";
 import { EventEmitter } from "stream";
 
-export class Stepper {
+export class Stepper extends EventEmitter {
     private pulse: Stepper.Pulse;
     private enable: Stepper.Enable;
     private maxSpeed: number;
-    private pulsePin: Gpio;
+    private pulsePin: Gpio[];
     private direction: Stepper.Direction;
     private nanoTimer: NanoTimer;
-    private eventEmitter: EventEmitter;
-    private directionPin: Gpio;
+    private directionPin: Gpio[];
     private currentPosition: number;
     private remainingPulses: number;
 
     constructor(options: Stepper.Options) {
+        super();
+
         this.pulse = Stepper.Pulse.Off;
         this.enable = Stepper.Enable.Off;
         this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
         this.direction = Stepper.Direction.Forwards;
         this.nanoTimer = new NanoTimer();
-        this.eventEmitter = new EventEmitter();
         this.directionPin = options.directionPin;
         this.currentPosition = 0;
         this.remainingPulses = 0;
@@ -49,7 +49,7 @@ export class Stepper {
         this.pulse = Stepper.Pulse.On;
         this.enable = Stepper.Enable.On;
         this.direction = direction;
-        this.directionPin.writeSync(direction);
+        this.directionPin.forEach((pin) => pin.writeSync(direction));
         this.remainingPulses = pulses;
 
         this.emit(Stepper.Event.MoveStart);
@@ -66,7 +66,7 @@ export class Stepper {
             return this.finish();
         }
 
-        this.pulsePin.writeSync(this.pulse);
+        this.pulsePin.forEach((pin) => pin.writeSync(this.pulse));
         this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
 
         this.remainingPulses--;
@@ -99,11 +99,11 @@ export class Stepper {
     };
 
     public on = <T extends Stepper.Event>(eventName: T, listener: () => void) => {
-        this.eventEmitter.on(eventName, listener);
+        return super.on(eventName, listener);
     };
 
-    private emit = <T extends Stepper.Event>(eventName: T) => {
-        this.eventEmitter.emit(eventName);
+    public emit = <T extends Stepper.Event>(eventName: T) => {
+        return super.emit(eventName);
     };
 }
 
@@ -130,8 +130,8 @@ export namespace Stepper {
 
     export type Options = {
         maxSpeed: number;
-        pulsePin: Gpio;
-        directionPin: Gpio;
+        pulsePin: Gpio[];
+        directionPin: Gpio[];
     };
 
     export type MoveOptions = {

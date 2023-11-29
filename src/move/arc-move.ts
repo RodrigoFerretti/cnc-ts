@@ -14,12 +14,14 @@ export class ArcMove extends Move {
         super(options);
 
         this.arc = options.arc;
+        this.homeSensor = options.homeSensor;
+        this.limitSensor = options.limitSensor;
         this.coordinate = options.coordinate;
         this.currentPosition = 0;
         this.timeBetweenPositions = this.arc.perimeter / this.speed / this.arc.totalPositions;
 
-        this.homeSensor.on(Sensor.Event.Trigger, this.break);
-        this.limitSensor.on(Sensor.Event.Trigger, this.break);
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.break));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Trigger, this.break));
 
         this.nanoTimer.setInterval(this.moveToNextPosition, "", `${this.timeBetweenPositions * 1e6}u`);
     }
@@ -44,7 +46,7 @@ export namespace ArcMove {
         speed: number;
         stepper: Stepper;
         coordinate: Coordinate.X | Coordinate.Y;
-        homeSensor: Sensor;
-        limitSensor: Sensor;
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 }
