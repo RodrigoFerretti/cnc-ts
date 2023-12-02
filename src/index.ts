@@ -19,12 +19,13 @@ const service = new Service({
                 }),
             ],
             maxSpeed: 2000,
+            inverted: true,
         }),
         homeSensor: [
             new Sensor({
-                pin: new Gpio(21, {
+                pin: new Gpio(5, {
                     mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_UP,
+                    pullUpDown: Gpio.PUD_DOWN,
                 }),
             }),
         ],
@@ -32,7 +33,7 @@ const service = new Service({
             new Sensor({
                 pin: new Gpio(27, {
                     mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_UP,
+                    pullUpDown: Gpio.PUD_DOWN,
                 }),
             }),
         ],
@@ -59,13 +60,13 @@ const service = new Service({
         }),
         homeSensor: [
             new Sensor({
-                pin: new Gpio(24, {
+                pin: new Gpio(12, {
                     mode: Gpio.INPUT,
                     pullUpDown: Gpio.PUD_DOWN,
                 }),
             }),
             new Sensor({
-                pin: new Gpio(19, {
+                pin: new Gpio(20, {
                     mode: Gpio.INPUT,
                     pullUpDown: Gpio.PUD_DOWN,
                 }),
@@ -79,7 +80,7 @@ const service = new Service({
                 }),
             }),
             new Sensor({
-                pin: new Gpio(20, {
+                pin: new Gpio(21, {
                     mode: Gpio.INPUT,
                     pullUpDown: Gpio.PUD_DOWN,
                 }),
@@ -102,7 +103,7 @@ const service = new Service({
         }),
         homeSensor: [
             new Sensor({
-                pin: new Gpio(5, {
+                pin: new Gpio(4, {
                     mode: Gpio.INPUT,
                     pullUpDown: Gpio.PUD_UP,
                 }),
@@ -110,7 +111,7 @@ const service = new Service({
         ],
         limitSensor: [
             new Sensor({
-                pin: new Gpio(12, {
+                pin: new Gpio(19, {
                     mode: Gpio.INPUT,
                     pullUpDown: Gpio.PUD_UP,
                 }),

@@ -7,6 +7,7 @@ export class Stepper extends EventEmitter {
     private enable: Stepper.Enable;
     private maxSpeed: number;
     private pulsePin: Gpio[];
+    private inverted: boolean;
     private direction: Stepper.Direction;
     private nanoTimer: NanoTimer;
     private directionPin: Gpio[];
@@ -20,6 +21,7 @@ export class Stepper extends EventEmitter {
         this.enable = Stepper.Enable.Off;
         this.maxSpeed = options.maxSpeed;
         this.pulsePin = options.pulsePin;
+        this.inverted = options.inverted || false;
         this.direction = Stepper.Direction.Forwards;
         this.nanoTimer = new NanoTimer();
         this.directionPin = options.directionPin;
@@ -49,7 +51,7 @@ export class Stepper extends EventEmitter {
         this.pulse = Stepper.Pulse.On;
         this.enable = Stepper.Enable.On;
         this.direction = direction;
-        this.directionPin.forEach((pin) => pin.digitalWrite(direction));
+        this.directionPin.forEach((pin) => pin.digitalWrite(this.inverted ? direction ^ 1 : direction));
         this.remainingPulses = pulses;
 
         this.emit(Stepper.Event.MoveStart);
@@ -132,6 +134,7 @@ export namespace Stepper {
         maxSpeed: number;
         pulsePin: Gpio[];
         directionPin: Gpio[];
+        inverted?: boolean;
     };
 
     export type MoveOptions = {

@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "run server",
-            "command": "yarn ts-node-dev ./src/index.ts",
+            "command": "sudo yarn ts-node-dev ./src/index.ts",
             "request": "launch",
             "type": "node-terminal"
         }
