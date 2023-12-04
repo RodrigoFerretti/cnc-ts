@@ -1,4 +1,4 @@
-import { Sensor } from "../io/sensor";
+import { Gpio } from "pigpio";
 import { Stepper } from "../io/stepper";
 import { Arc } from "../math/arc";
 import { Coordinate } from "../math/coodinate";
@@ -235,8 +235,8 @@ export namespace Service {
 
     export type Axis = {
         stepper: Stepper;
-        homeSensor: Sensor[];
-        limitSensor: Sensor[];
+        homeSensor: Gpio[];
+        limitSensor: Gpio[];
     };
 
     export type Handler<T extends GCode = any> = (gCode: T) => void;

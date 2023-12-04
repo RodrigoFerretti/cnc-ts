@@ -1,5 +1,4 @@
 import { Gpio } from "pigpio";
-import { Sensor } from "./io/sensor";
 import { Stepper } from "./io/stepper";
 import { Controller } from "./server/controller";
 import { Server } from "./server/server";
@@ -22,19 +21,17 @@ const service = new Service({
             inverted: true,
         }),
         homeSensor: [
-            new Sensor({
-                pin: new Gpio(5, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+            new Gpio(5, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
         limitSensor: [
-            new Sensor({
-                pin: new Gpio(27, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+            new Gpio(27, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
     },
@@ -59,31 +56,28 @@ const service = new Service({
             maxSpeed: 2000,
         }),
         homeSensor: [
-            new Sensor({
-                pin: new Gpio(12, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+            new Gpio(12, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
-            new Sensor({
-                pin: new Gpio(20, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+
+            new Gpio(20, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
         limitSensor: [
-            new Sensor({
-                pin: new Gpio(25, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+            new Gpio(25, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
-            new Sensor({
-                pin: new Gpio(21, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_DOWN,
-                }),
+            new Gpio(21, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
     },
@@ -102,19 +96,17 @@ const service = new Service({
             maxSpeed: 2000,
         }),
         homeSensor: [
-            new Sensor({
-                pin: new Gpio(4, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_UP,
-                }),
+            new Gpio(4, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
         limitSensor: [
-            new Sensor({
-                pin: new Gpio(19, {
-                    mode: Gpio.INPUT,
-                    pullUpDown: Gpio.PUD_UP,
-                }),
+            new Gpio(19, {
+                mode: Gpio.INPUT,
+                pullUpDown: Gpio.PUD_DOWN,
+                alert: true,
             }),
         ],
     },
