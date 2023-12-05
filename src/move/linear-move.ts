@@ -1,14 +1,14 @@
-import { Move } from "./move";
+import { Sensor } from "../io/sensor";
 import { Stepper } from "../io/stepper";
-import { Gpio } from "pigpio";
+import { Move } from "./move";
 
 export class LinearMove extends Move {
     public constructor(options: LinearMove.Options) {
         super(options);
 
         this.stepper.on(Stepper.Event.MoveFinish, this.finish);
-        this.homeSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.break()));
-        this.limitSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.break()));
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.break));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.break));
         this.stepper.move({ position: options.position, speed: this.speed });
     }
 }
@@ -18,7 +18,7 @@ export namespace LinearMove {
         speed: number;
         stepper: Stepper;
         position: number;
-        homeSensor: Gpio[];
-        limitSensor: Gpio[];
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 }

@@ -4,6 +4,7 @@ import { Controller } from "./server/controller";
 import { Server } from "./server/server";
 import { Service } from "./server/service";
 import config from "./config.json";
+import { Sensor } from "./io/sensor";
 
 const service = new Service({
     x: {
@@ -22,18 +23,22 @@ const service = new Service({
             inverted: true,
         }),
         homeSensor: [
-            new Gpio(config.x.hom, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.x.hom, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
         limitSensor: [
-            new Gpio(config.x.lim, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.x.lim, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
     },
     y: {
@@ -57,29 +62,37 @@ const service = new Service({
             maxSpeed: config.y.max,
         }),
         homeSensor: [
-            new Gpio(config.y.hom, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.y.hom, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
 
-            new Gpio(config.a.hom, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.a.hom, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
         limitSensor: [
-            new Gpio(config.y.lim, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
-            new Gpio(config.a.lim, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.y.lim, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
+            new Sensor(
+                new Gpio(config.a.lim, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
     },
     z: {
@@ -97,18 +110,22 @@ const service = new Service({
             maxSpeed: config.z.max,
         }),
         homeSensor: [
-            new Gpio(config.z.hom, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.z.hom, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
         limitSensor: [
-            new Gpio(config.z.lim, {
-                mode: Gpio.INPUT,
-                pullUpDown: Gpio.PUD_DOWN,
-                alert: true,
-            }),
+            new Sensor(
+                new Gpio(config.z.lim, {
+                    mode: Gpio.INPUT,
+                    pullUpDown: Gpio.PUD_DOWN,
+                    alert: true,
+                }),
+            ),
         ],
     },
 });

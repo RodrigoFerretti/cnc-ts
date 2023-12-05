@@ -1,5 +1,5 @@
 import NanoTimer from "nanotimer";
-import { Gpio } from "pigpio";
+import { Sensor } from "../io/sensor";
 import { Stepper } from "../io/stepper";
 
 export abstract class Move {
@@ -7,8 +7,8 @@ export abstract class Move {
     protected stepper: Stepper;
     protected currentStatus: Move.Status;
     protected nanoTimer: NanoTimer;
-    protected homeSensor: Gpio[];
-    protected limitSensor: Gpio[];
+    protected homeSensor: Sensor[];
+    protected limitSensor: Sensor[];
 
     public constructor(options: Move.Options) {
         this.speed = options.speed;
@@ -46,8 +46,8 @@ export namespace Move {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        homeSensor: Gpio[];
-        limitSensor: Gpio[];
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 
     export enum Status {

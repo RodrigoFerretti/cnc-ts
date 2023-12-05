@@ -1,8 +1,8 @@
+import { Sensor } from "../io/sensor";
+import { Stepper } from "../io/stepper";
 import { Arc } from "../math/arc";
 import { Coordinate } from "../math/coodinate";
 import { Move } from "./move";
-import { Stepper } from "../io/stepper";
-import { Gpio } from "pigpio";
 
 export class ArcMove extends Move {
     private arc: Arc;
@@ -20,8 +20,8 @@ export class ArcMove extends Move {
         this.currentPosition = 0;
         this.timeBetweenPositions = this.arc.perimeter / this.speed / this.arc.totalPositions;
 
-        this.homeSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.break));
-        this.limitSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.break));
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.break));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.break));
 
         this.nanoTimer.setInterval(this.moveToNextPosition, "", `${this.timeBetweenPositions * 1e6}u`);
     }
@@ -46,7 +46,7 @@ export namespace ArcMove {
         speed: number;
         stepper: Stepper;
         coordinate: Coordinate.X | Coordinate.Y;
-        homeSensor: Gpio[];
-        limitSensor: Gpio[];
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
     };
 }

@@ -1,6 +1,6 @@
-import { Move } from "./move";
+import { Sensor } from "../io/sensor";
 import { Stepper } from "../io/stepper";
-import { Gpio } from "pigpio";
+import { Move } from "./move";
 
 export class Home extends Move {
     private stage: Home.Stage;
@@ -17,8 +17,8 @@ export class Home extends Move {
         this.retractPosition = options.retractPosition;
 
         this.stepper.on(Stepper.Event.MoveFinish, this.onStepperMoveFinish);
-        this.homeSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.onHomeSensorTrigger()));
-        this.limitSensor.forEach((sensor) => sensor.on("alert", (level) => !level && this.break()));
+        this.homeSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.onHomeSensorTrigger));
+        this.limitSensor.forEach((sensor) => sensor.on(Sensor.Event.Read, this.break));
         this.nanoTimer.setInterval(this.loop, "", "1u");
     }
 
@@ -89,8 +89,8 @@ export namespace Home {
     export type Options = {
         speed: number;
         stepper: Stepper;
-        homeSensor: Gpio[];
-        limitSensor: Gpio[];
+        homeSensor: Sensor[];
+        limitSensor: Sensor[];
         retractSpeed: number;
         retractPosition: number;
     };
