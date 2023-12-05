@@ -79,10 +79,15 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = gCode.f!;
-        const distanceMagnitude = distance.magnitude;
 
-        const time = distanceMagnitude / speedMagnitude;
+        const maxTime = new Vector<3>(
+            distance.x / this.axes.x.stepper.maxSpeed,
+            distance.y / this.axes.y.stepper.maxSpeed,
+            distance.z / this.axes.z.stepper.maxSpeed,
+        );
+
+        const distanceMagnitude = distance.magnitude;
+        const time = gCode.f ? distanceMagnitude / gCode.f : Math.max(maxTime.x, maxTime.y, maxTime.z);
 
         const speed = new Vector<3>(
             Math.abs(distance.x / time),

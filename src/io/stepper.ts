@@ -3,9 +3,10 @@ import { Gpio } from "pigpio";
 import { EventEmitter } from "stream";
 
 export class Stepper extends EventEmitter {
+    public maxSpeed: number;
+
     private pulse: Stepper.Pulse;
     private enable: Stepper.Enable;
-    private maxSpeed: number;
     private pulsePin: Gpio[];
     private inverted: boolean;
     private direction: Stepper.Direction;
@@ -36,8 +37,6 @@ export class Stepper extends EventEmitter {
     public set position(position: number) {
         this.currentPosition = position;
     }
-
-    public getMaxSpeed = () => this.maxSpeed;
 
     public move = (options: Stepper.MoveOptions) => {
         const distance = options.position - this.currentPosition;
