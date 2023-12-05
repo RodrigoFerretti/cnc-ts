@@ -3,32 +3,33 @@ import { Stepper } from "./io/stepper";
 import { Controller } from "./server/controller";
 import { Server } from "./server/server";
 import { Service } from "./server/service";
+import config from "./config.json";
 
 const service = new Service({
     x: {
         stepper: new Stepper({
             directionPin: [
-                new Gpio(16, {
+                new Gpio(config.x.dir, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
             pulsePin: [
-                new Gpio(6, {
+                new Gpio(config.x.pul, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
-            maxSpeed: 2000,
+            maxSpeed: config.x.max,
             inverted: true,
         }),
         homeSensor: [
-            new Gpio(5, {
+            new Gpio(config.x.hom, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
             }),
         ],
         limitSensor: [
-            new Gpio(27, {
+            new Gpio(config.x.lim, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
@@ -38,43 +39,43 @@ const service = new Service({
     y: {
         stepper: new Stepper({
             directionPin: [
-                new Gpio(22, {
+                new Gpio(config.y.dir, {
                     mode: Gpio.OUTPUT,
                 }),
-                new Gpio(18, {
+                new Gpio(config.a.dir, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
             pulsePin: [
-                new Gpio(23, {
+                new Gpio(config.y.pul, {
                     mode: Gpio.OUTPUT,
                 }),
-                new Gpio(17, {
+                new Gpio(config.a.pul, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
-            maxSpeed: 2000,
+            maxSpeed: config.y.max,
         }),
         homeSensor: [
-            new Gpio(12, {
+            new Gpio(config.y.hom, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
             }),
 
-            new Gpio(20, {
+            new Gpio(config.a.hom, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
             }),
         ],
         limitSensor: [
-            new Gpio(25, {
+            new Gpio(config.y.lim, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
             }),
-            new Gpio(21, {
+            new Gpio(config.a.lim, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
@@ -84,26 +85,26 @@ const service = new Service({
     z: {
         stepper: new Stepper({
             directionPin: [
-                new Gpio(26, {
+                new Gpio(config.z.dir, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
             pulsePin: [
-                new Gpio(13, {
+                new Gpio(config.z.pul, {
                     mode: Gpio.OUTPUT,
                 }),
             ],
-            maxSpeed: 2000,
+            maxSpeed: config.z.max,
         }),
         homeSensor: [
-            new Gpio(4, {
+            new Gpio(config.z.hom, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,
             }),
         ],
         limitSensor: [
-            new Gpio(19, {
+            new Gpio(config.z.lim, {
                 mode: Gpio.INPUT,
                 pullUpDown: Gpio.PUD_DOWN,
                 alert: true,

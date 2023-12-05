@@ -10,15 +10,14 @@ import { Move } from "../move/move";
 import { GCode } from "./gcode";
 
 export class Service {
+    public status: Service.Status;
     public gcode: Record<GCode.Command, Service.Handler>;
-
     private moves: Move[];
-    private currentStatus: Service.Status;
 
     constructor(public axes: Service.Axes) {
         this.moves = [];
-        this.currentStatus = Service.Status.Idle;
-        this.resume = this.setResume(this.currentStatus);
+        this.status = Service.Status.Idle;
+        this.resume = this.setResume(this.status);
 
         setInterval(this.loop);
 
@@ -33,16 +32,8 @@ export class Service {
         };
     }
 
-    public get status() {
-        return this.currentStatus;
-    }
-
-    private get stepperMaxSpeed() {
-        return Math.min(...Object.values(this.axes).map((axis) => axis.stepper.getMaxSpeed()));
-    }
-
     private home = () => {
-        this.currentStatus = Service.Status.Homing;
+        this.status = Service.Status.Homing;
 
         this.moves = [
             new Home({
@@ -73,7 +64,7 @@ export class Service {
     };
 
     private linearMove = (gCode: GCode.LinearMove | GCode.RapidMove) => {
-        this.currentStatus = Service.Status.LinearMoving;
+        this.status = Service.Status.LinearMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -88,7 +79,7 @@ export class Service {
         );
 
         const distance = Vector.subtract(finalPosition, currentPosition);
-        const speedMagnitude = gCode.f || this.stepperMaxSpeed / 2;
+        const speedMagnitude = gCode.f!;
         const distanceMagnitude = distance.magnitude;
 
         const time = distanceMagnitude / speedMagnitude;
@@ -125,7 +116,7 @@ export class Service {
     };
 
     private arcMove = (gCode: GCode.ArcMove) => {
-        this.currentStatus = Service.Status.ArcMoving;
+        this.status = Service.Status.ArcMoving;
 
         const currentPosition = new Vector<3>(
             this.axes.x.stepper.position,
@@ -156,7 +147,7 @@ export class Service {
             initialPosition: new Vector<2>(currentPosition[arcX], currentPosition[arcY]),
         });
 
-        const speedMagnitude = gCode.f || this.stepperMaxSpeed / 2;
+        const speedMagnitude = gCode.f!;
         const linearMoveSpeed = (finalPosition[arcZ] - currentPosition[arcZ]) / (arc.perimeter / speedMagnitude);
 
         this.moves = [
@@ -187,14 +178,14 @@ export class Service {
     };
 
     private pause = () => {
-        const resumeStatus = this.currentStatus;
-        this.currentStatus = Service.Status.Paused;
+        const resumeStatus = this.status;
+        this.status = Service.Status.Paused;
         this.resume = this.setResume(resumeStatus);
         Object.values(this.axes).forEach((axis) => axis.stepper.stop());
     };
 
     private setResume = (status: Service.Status) => () => {
-        this.currentStatus = status;
+        this.status = status;
         Object.values(this.axes).forEach((axis) => axis.stepper.resume());
     };
 
@@ -205,13 +196,13 @@ export class Service {
 
         if (this.moves.length !== 0 && movesStatus.every((moveStatus) => moveStatus === Move.Status.Finished)) {
             this.moves = [];
-            this.currentStatus = Service.Status.Idle;
+            this.status = Service.Status.Idle;
         }
 
         if (movesStatus.some((moveStatus) => moveStatus === Move.Status.Broke)) {
             this.moves.forEach((move) => move.break());
             this.moves = [];
-            this.currentStatus = Service.Status.SensorTriggered;
+            this.status = Service.Status.SensorTriggered;
         }
     };
 }

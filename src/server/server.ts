@@ -1,15 +1,12 @@
-import express, { Express } from "express";
-import expressws, { Instance } from "express-ws";
+import express from "express";
+import expressws from "express-ws";
 import { Controller } from "./controller";
 
 export class Server {
-    private app: Express;
-    private wss: Instance;
+    private app = express();
+    private wss = expressws(this.app);
 
     public constructor(private controller: Controller) {
-        this.app = express();
-        this.wss = expressws(this.app);
-
         this.app.use(express.json());
         this.wss.app.ws("/gcode", this.controller.gCodeWebSocketHandler);
         this.wss.app.ws("/error", /** TODO */ () => {});
