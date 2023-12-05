@@ -10,21 +10,21 @@ export class Vector<N extends 2 | 3> {
     }
 
     public get magnitude() {
-        return Math.sqrt(this.x ** 2 + this.y ** 2 + (this.z ?? 0) ** 2);
+        return Math.sqrt(this.x ** 2 + this.y ** 2 + (this.z || 0) ** 2);
     }
 }
 
 export namespace Vector {
     export const add = <N extends 2 | 3>(v1: Vector<N>, v2: Vector<N>) => {
-        return new Vector<N>(v1.x + v2.x, v1.y + v2.y, v1.z && v2.z ? v1.z + v2.z : undefined);
+        return new Vector<N>(v1.x + v2.x, v1.y + v2.y, (v1.z || 0) + (v2.z || 0));
     };
 
     export const subtract = <N extends 2 | 3>(v1: Vector<N>, v2: Vector<N>) => {
-        return new Vector<N>(v1.x - v2.x, v1.y - v2.y, v1.z && v2.z ? v1.z - v2.z : undefined);
+        return new Vector<N>(v1.x - v2.x, v1.y - v2.y, (v1.z || 0) - (v2.z || 0));
     };
 
     export const dotProduct = <N extends 2 | 3>(v1: Vector<N>, v2: Vector<N>) => {
-        return v1.x * v2.x + v1.y * v2.y + (v1.z ?? 0) * (v2.z ?? 0);
+        return v1.x * v2.x + v1.y * v2.y + (v1.z || 0) * (v2.z || 0);
     };
 
     export const crossProduct = (v1: Vector<2>, v2: Vector<2>) => {
@@ -47,8 +47,13 @@ export namespace Vector {
             Vector.dotProduct(centerToV1, centerToV2),
         );
 
-        if (options.isClockWise && angle >= 0) return angle - 2 * Math.PI;
-        if (!options.isClockWise && angle <= 0) return angle + 2 * Math.PI;
+        if (options.isClockWise && angle >= 0) {
+            return angle - 2 * Math.PI;
+        }
+
+        if (!options.isClockWise && angle <= 0) {
+            return angle + 2 * Math.PI;
+        }
 
         return angle;
     };
