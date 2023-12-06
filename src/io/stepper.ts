@@ -43,7 +43,7 @@ export class Stepper extends EventEmitter {
         const steps = Math.abs(distance);
         const pulses = steps * 2;
         const direction = distance > 0 ? Stepper.Direction.Forwards : Stepper.Direction.Backwards;
-        const pulseDelay = 5e5 / options.speed || 1;
+        const pulseDelay = 5e5 / (options.speed || 5e5);
 
         this.nanoTimer.clearInterval();
 
