@@ -1,4 +1,4 @@
-import { Gpio } from "pigpio";
+import { Gpio } from "onoff";
 import { EventEmitter } from "stream";
 
 export class Sensor extends EventEmitter {
@@ -8,7 +8,7 @@ export class Sensor extends EventEmitter {
     }
 
     private read = () => {
-        const reading = this.pin.digitalRead();
+        const reading = this.pin.readSync();
         if (!reading) {
             this.emit(Sensor.Event.Read);
         }

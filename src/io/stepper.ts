@@ -1,5 +1,5 @@
 import NanoTimer from "nanotimer";
-import { Gpio } from "pigpio";
+import { BinaryValue, Gpio } from "onoff";
 import { EventEmitter } from "stream";
 
 export class Stepper extends EventEmitter {
@@ -50,7 +50,7 @@ export class Stepper extends EventEmitter {
         this.pulse = Stepper.Pulse.On;
         this.enable = Stepper.Enable.On;
         this.direction = direction;
-        this.directionPin.forEach((pin) => pin.digitalWrite(this.inverted ? direction ^ 1 : direction));
+        this.directionPin.forEach((pin) => pin.writeSync(this.inverted ? ((direction ^ 1) as BinaryValue) : direction));
         this.remainingPulses = pulses;
 
         this.emit(Stepper.Event.MoveStart);
@@ -67,7 +67,7 @@ export class Stepper extends EventEmitter {
             return this.finish();
         }
 
-        this.pulsePin.forEach((pin) => pin.digitalWrite(this.pulse));
+        this.pulsePin.forEach((pin) => pin.writeSync(this.pulse));
         this.pulse = this.pulse === Stepper.Pulse.On ? Stepper.Pulse.Off : Stepper.Pulse.On;
 
         this.remainingPulses--;
